@@ -1,4 +1,4 @@
-require 'fog/cloudstack/core'
+require 'fog/abiquo/core'
 require 'digest/md5'
 
 module Fog
@@ -24,13 +24,58 @@ module Fog
           @abiquo_username = options[:abiquo_username]
           @abiquo_password = options[:abiquo_password]
 
-          @connection = Fog::Core::Connection.new(options[:abiquo_api_url], options[:abiquo_persistent], {:ssl_verify_peer => false})
+          @connection = Fog::Core::Connection.new(options[:abiquo_api], options[:abiquo_persistent], {:ssl_verify_peer => false})
         end
 
         def reload
           @connection.reset
         end
 
+        def request(params)
+          params.reject!{|k,v| v.nil?}
+
+          params.merge!('response' => 'json')
+
+          # This should be changed to check cookie auth
+          # if has_session?
+            # params, headers = authorize_session(params)
+          # elsif has_keys?
+            # params, headers = authorize_api_keys(params)
+          # end
+
+          headers = {}
+
+          response = issue_request(params,headers)
+          response = Fog::JSON.decode(response.body) unless response.body.empty?
+          response
+        end
+
+        def issue_request(params={},headers={},method='GET',expects=200)
+          begin
+            @connection.request({
+              :query => params,
+              :headers => headers,
+              :method => method,
+              :expects => expects
+            })
+
+          rescue Excon::Errors::HTTPStatusError => error
+            error_response = Fog::JSON.decode(error.response.body)
+
+            error_code = error_response.values.first['errorcode']
+            error_text = error_response.values.first['errortext']
+
+            case error_code
+            when 401
+              raise Fog::Compute::Cloudstack::Unauthorized, error_text
+            when 431
+              raise Fog::Compute::Cloudstack::BadRequest, error_text
+            else
+              raise Fog::Compute::Cloudstack::Error, error_text
+            end
+          end
+        end
+        
         # def login(username,password)
         #   response = issue_request({
         #     'response' => 'json',

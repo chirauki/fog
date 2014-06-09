@@ -3,12 +3,11 @@ module Fog
     class Abiquo
       class Real
         def list_virtualdatacenters(options = {})
-          options.merge!(
+          request(
             :expects  => [200],
             :method   => 'GET',
             :path     => '/cloud/virtualdatacenters'
           )
-          request(options)
         end
       end
 
