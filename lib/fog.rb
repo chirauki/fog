@@ -18,6 +18,7 @@ require 'fog/core/deprecated_connection_accessors'
 
 # any one of these can be required separately.
 # they all depend on fog/core for shared functionality.
+require 'fog/abiquo'
 require 'fog/atmos'
 require 'fog/aws'
 require 'fog/bluebox'
