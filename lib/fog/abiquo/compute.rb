@@ -34,7 +34,7 @@ module Fog
         def request(params)
           params.reject!{|k,v| v.nil?}
 
-          params.merge!('response' => 'json')
+          # params.merge!('response' => 'json')
 
           # This should be changed to check cookie auth
           # if has_session?
@@ -42,17 +42,24 @@ module Fog
           # elsif has_keys?
             # params, headers = authorize_api_keys(params)
           # end
+          headers={}
+          # headers.merge!('Accept' => params[:accept]) if params.extract!(:accept)          
+          headers.merge!('Accept' => params.delete(:accept)) if params.has_key?(:accept)
+          # Only basic-auth is supported at the moment, it would be nice auth by cookie
+          headers.merge!({'Authorization' => "Basic #{Base64.encode64(@abiquo_username+":"+@abiquo_password).delete("\r\n")}"})
 
-          headers = {}
+          path = params.delete(:path)
 
-          response = issue_request(params,headers)
+
+          response = issue_request(path,params,headers)
           response = Fog::JSON.decode(response.body) unless response.body.empty?
           response
         end
 
-        def issue_request(params={},headers={},method='GET',expects=200)
+        def issue_request(path,params={},headers={}, method='GET',expects=200)
           begin
             @connection.request({
+              :path => path,
               :query => params,
               :headers => headers,
               :method => method,
