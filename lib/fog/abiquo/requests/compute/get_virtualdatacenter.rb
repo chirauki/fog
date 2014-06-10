@@ -6,7 +6,8 @@ module Fog
           request(
             :expects  => [200],
             :method   => 'GET',
-            :path     => '/cloud/virtualdatacenters/%s' % [vdc_id]
+            :path     => '/cloud/virtualdatacenters/%s' % vdc_id,
+            :accept   => 'application/vnd.abiquo.virtualdatacenter+json'
           )
         end
       end

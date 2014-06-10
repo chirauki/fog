@@ -2,18 +2,18 @@ module Fog
   module Compute
     class Abiquo
       class Real
-        def list_virtualdatacenters(options = {})
+        def get_virtualapp(options = {})
           request(
             :expects  => [200],
             :method   => 'GET',
-            :path     => '/cloud/virtualdatacenters',
-            :accept  => 'application/vnd.abiquo.virtualdatacenters+json'
+            :path     => "#{options[:vapps_lnk]}/#{options[:vapp_id]}",
+            :accept   => 'application/vnd.abiquo.virtualappliance+json'
           )
         end
       end
 
       class Mock
-        def list_virtualdatacenters(options = {})
+        def get_virtualapp
           Fog::Mock.not_implemented
         end
       end

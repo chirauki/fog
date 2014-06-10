@@ -1,5 +1,6 @@
 require 'fog/abiquo/core'
 require 'digest/md5'
+require 'uri'
 
 module Fog
   module Compute
@@ -7,24 +8,42 @@ module Fog
       # class BadRequest < Fog::Compute::Cloudstack::Error; end
       # class Unauthorized < Fog::Compute::Cloudstack::Error; end
 
-      requires :abiquo_api
-
-      recognizes :abiquo_username, :abiquo_password
+      requires :abiquo_api_url, :abiquo_username, :abiquo_password
 
       request_path 'fog/abiquo/requests/compute'
 
       model_path 'fog/abiquo/models/compute'
       model :virtualdatacenter
       collection :virtualdatacenters
+      model :virtualapp
+      collection :virtualapps
+
+      model :datacenter
+      collection :datacenters
+      model :rack
+      collection :racks
 
       request :list_virtualdatacenters
+      request :get_virtualdatacenter
+      request :create_virtualdatacenter
+      request :list_virtualapps
+      request :get_virtualapp
+
+      request :list_datacenters
+      request :get_datacenter
+      request :list_racks
+      request :get_rack
+      request :create_rack
+      request :delete_rack
 
       class Real
         def initialize(options={})
           @abiquo_username = options[:abiquo_username]
           @abiquo_password = options[:abiquo_password]
+          
+          @api_path = URI.parse(options[:abiquo_api_url]).path
 
-          @connection = Fog::Core::Connection.new(options[:abiquo_api], options[:abiquo_persistent], {:ssl_verify_peer => false})
+          @connection = Fog::Core::Connection.new(options[:abiquo_api_url], options[:abiquo_persistent], {:ssl_verify_peer => false})
         end
 
         def reload
@@ -45,26 +64,39 @@ module Fog
           headers={}
           # headers.merge!('Accept' => params[:accept]) if params.extract!(:accept)          
           headers.merge!('Accept' => params.delete(:accept)) if params.has_key?(:accept)
+          headers.merge!('Content-Type' => params.delete(:content)) if params.has_key?(:content)
+          
           # Only basic-auth is supported at the moment, it would be nice auth by cookie
           headers.merge!({'Authorization' => "Basic #{Base64.encode64(@abiquo_username+":"+@abiquo_password).delete("\r\n")}"})
 
           path = params.delete(:path)
+          path.gsub!(/^.*#{@api_path}/, "") if path.include?(@api_path)
+          body = params.delete(:body)
+          expect = params.delete(:expects)
+          method = params.delete(:method)
 
-
-          response = issue_request(path,params,headers)
+          response = issue_request(path, body, params, headers, method, expect)
           response = Fog::JSON.decode(response.body) unless response.body.empty?
           response
         end
 
-        def issue_request(path,params={},headers={}, method='GET',expects=200)
+        def issue_request(path,body=nil,params={},headers={},method='GET',expects=200)
           begin
-            @connection.request({
-              :path => path,
+            p = @api_path + path
+            resp = @connection.request({
+              :path => p,
               :query => params,
               :headers => headers,
               :method => method,
-              :expects => expects
+              :expects => expects,
+              :body => body
             })
+
+            if resp.data['status'] == 204
+              nil
+            else
+              resp
+            end
 
           rescue Excon::Errors::HTTPStatusError => error
             error_response = Fog::JSON.decode(error.response.body)
