@@ -15,8 +15,12 @@ module Fog
       model_path 'fog/abiquo/models/compute'
       model :virtualdatacenter
       collection :virtualdatacenters
+      
       model :virtualapp
       collection :virtualapps
+
+      model :virtualmachine
+      collection :virtualmachines
 
       model :datacenter
       collection :datacenters
@@ -35,6 +39,9 @@ module Fog
       request :get_rack
       request :create_rack
       request :delete_rack
+
+      request :get_virtualmachine
+      request :list_virtualmachines
 
       class Real
         def initialize(options={})
