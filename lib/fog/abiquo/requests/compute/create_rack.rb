@@ -15,14 +15,10 @@ module Fog
             :links      => [datacenter_link]
           }
 
-          vanilla_options = [:haEnabled, :vlanIdMin]
+          vanilla_options = [:haEnabled, :vlanIdMin, :haEnabled, :name, :nrsq, :vlanIdMax, :vlanIdMin, :vlanPerVdcReserved ]
           vanilla_options.reject{ |o| options[o].nil? }.each do |key|
-            binding.pry
             payload[key] = options[key]
           end
-        
-
-          binding.pry
 
           request(
             :expects  => [200, 201],

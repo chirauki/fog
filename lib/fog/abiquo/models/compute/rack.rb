@@ -26,15 +26,16 @@ module Fog
           service.delete_rack(mylnk)
         end
 
+        #abq.racks.create( :name => 'foo', :datacenter => dc )
+        #abq.racks.create( :name => 'tessxtfog1', :datacenter => dc, :haEnabled => true, :nrsq => 1, :vlanIdMax => 100, :vlanIdMin => 8, :vlanPerVdcReserved => 15 )
         def save
-          binding.pry
           requires :name, :datacenter
           data = service.create_rack(attributes)
-          binding.pry
-          merge_attributes(data.body)
-          binding.pry
+          merge_attributes(data)
           true
         end
+
+        
       end # Class vApp
     end # Class Abiquo
   end # module Compute
