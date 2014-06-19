@@ -10,6 +10,7 @@ module Fog
         attribute :vlanIdMax
         attribute :vlanIdMin
         attribute :vlanPerVdcReserved
+        attribute :datacenter
         
         attribute :links
 
@@ -23,6 +24,16 @@ module Fog
           requires :id
           mylnk = self.links.select {|l| l['rel'] == 'edit'}.first['href']
           service.delete_rack(mylnk)
+        end
+
+        def save
+          binding.pry
+          requires :name, :datacenter
+          data = service.create_rack(attributes)
+          binding.pry
+          merge_attributes(data.body)
+          binding.pry
+          true
         end
       end # Class vApp
     end # Class Abiquo

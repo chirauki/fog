@@ -22,12 +22,12 @@ module Fog
           new(rack_data)
         end
 
-        def create(options = {})
-          @racks_lnk ||= attributes[:racks_lnk]
-          resp = service.create_rack(@racks_lnk, options.to_json)
-          rack_data = resp
-          new(rack_data)
-        end
+        # def create(options = {})
+          # @racks_lnk ||= attributes[:racks_lnk]
+          # resp = service.create_rack(@racks_lnk, options.to_json)
+          # rack_data = resp
+          # new(rack_data)
+        # end
       end
     end
   end

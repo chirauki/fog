@@ -2,17 +2,40 @@ module Fog
   module Compute
     class Abiquo
       class Real
-        def create_rack(racks_lnk, payload, options = {})
+        def create_rack( options = {} )
+
+          # Extract datacenter link
+          datacenter_link = options[:datacenter].links.select { |x| x['rel'] == 'edit' }.first
+          datacenter_link["rel"] = "datacenter"
+          # Build racks link
+          racks_link = "#{datacenter_link['href']}/racks"
+
+          payload = {
+            :name       => options[:name],
+            :links      => [datacenter_link]
+          }
+
+          vanilla_options = [:haEnabled, :vlanIdMin]
+          vanilla_options.reject{ |o| options[o].nil? }.each do |key|
+            binding.pry
+            payload[key] = options[key]
+          end
+        
+
+          binding.pry
+
           request(
             :expects  => [200, 201],
             :method   => 'POST',
-            :path     => racks_lnk,
+            :path     => racks_link,
             :accept   => 'application/vnd.abiquo.rack+json',
             :content  => 'application/vnd.abiquo.rack+json',
-            :body     => payload
+            :body     => payload.to_json
           )
         end
+
       end
+
 
       class Mock
         def create_rack
