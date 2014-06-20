@@ -121,6 +121,16 @@ module Fog
             end
           end
         end
+
+        def parse_links(attributes)
+          attributes['links'].each do |link|
+            rel = "#{link['rel'].gsub(/\//, '_')}_lnk"
+            if 'edit'.eql?(link['rel'])
+              rel = 'url'
+            end
+            attributes[rel] = link
+          end
+        end # parse_links
         
         # def login(username,password)
         #   response = issue_request({
