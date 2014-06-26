@@ -123,6 +123,9 @@ module Fog
         end
 
         def parse_links(attributes)
+          binding.pry
+
+          
           attributes['links'].each do |link|
             rel = "#{link['rel'].gsub(/\//, '_')}_lnk"
             if 'edit'.eql?(link['rel'])

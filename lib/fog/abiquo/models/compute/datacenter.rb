@@ -30,7 +30,7 @@ module Fog
         end
 
         def initialize(attributes)
-          prepare_service_value(attributes)
+          # prepare_service_value(attributes)
           service.parse_links(attributes)
           super
         end
