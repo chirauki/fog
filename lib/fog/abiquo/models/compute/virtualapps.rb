@@ -8,7 +8,6 @@ module Fog
         model Fog::Compute::Abiquo::Virtualapp
 
         def all(options = {})
-          binding.pry
           @vapps_lnk ||= attributes[:vapps_lnk]
           response = service.list_virtualapps(@vapps_lnk)
           vapps_data = response["collection"] || []
