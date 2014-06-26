@@ -22,6 +22,8 @@ module Fog
       collection :datacenters
       model :rack
       collection :racks
+      model :remoteservice
+      collection :remoteservices
 
       request :list_virtualdatacenters
       request :get_virtualdatacenter
@@ -31,10 +33,16 @@ module Fog
 
       request :list_datacenters
       request :get_datacenter
+      request :create_datacenter
+      request :list_remoteservices
+      request :get_remoteservice
+      request :create_remoteservice
+      request :check_remoteservice
       request :list_racks
       request :get_rack
       request :create_rack
-      request :delete_rack
+
+      request :delete_entity
 
       class Real
         def initialize(options={})

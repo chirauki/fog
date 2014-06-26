@@ -22,7 +22,7 @@ module Fog
         def delete
           requires :id
           mylnk = self.links.select {|l| l['rel'] == 'edit'}.first['href']
-          service.delete_rack(mylnk)
+          service.delete_entity(mylnk)
         end
       end # Class vApp
     end # Class Abiquo

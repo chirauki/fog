@@ -9,12 +9,18 @@ module Fog
 
         def all(options = {})
           response = service.list_datacenters(options)
-          dcs_data = response["collection"] || []
-          load(dcs_data)
+          datacenters_data = response["collection"] || []
+          load(datacenters_data)
         end
 
         def get(dc_id)
           response = service.get_datacenter(dc_id)
+          datacenter_data = response
+          new(datacenter_data)
+        end
+
+        def create(options = {})
+          response = service.create_datacenter(options.to_json)
           datacenter_data = response
           new(datacenter_data)
         end
