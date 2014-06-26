@@ -7,7 +7,8 @@ module Fog
             :expects  => [200],
             :method   => 'GET',
             :path     => '/admin/datacenters',
-            :accept  => 'application/vnd.abiquo.datacenters+json'
+            :accept   => 'application/vnd.abiquo.datacenters+json',
+            :query    => options
           )
         end
       end

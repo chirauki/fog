@@ -1,7 +1,7 @@
 module Fog
   module Compute
     class Abiquo
-      class VirtualDatacenter < Fog::Model
+      class VirtualDatacenter < Fog::Compute::Abiquo::LinkModel
         identity  :id
 
         attribute :name
@@ -19,11 +19,19 @@ module Fog
         attribute :diskSoftLimitInMb
         attribute :hypervisorType
 
+        attribute :enterprise_lnk
+
         attribute :links
-        
+
         def reload
           requires :id
           service.get_virtualdatacenter(self.id)
+        end
+
+        def save
+          requires :name
+          resp = service.create_virtualdatacenter({:name => self.name, :links => self.links})
+          merge_attributes(resp.body)
         end
 
         def virtualapps

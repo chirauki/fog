@@ -3,12 +3,18 @@ module Fog
     class Abiquo
       class Real
         def create_virtualdatacenter(options = {})
+          data = {
+            'name'  => options[:name],
+            'links' => options[:links]
+          }
+
           request(
-            :expects  => [200],
+            :expects  => [201],
             :method   => 'POST',
-            :path     => '/cloud/virtualdatacenters' % vdc_id,
+            :path     => '/cloud/virtualdatacenters',
             :accept   => 'application/vnd.abiquo.virtualdatacenter+json',
             :content  => 'application/vnd.abiquo.virtualdatacenter+json',
+            :body     => Fog::JSON.encode(data)
           )
         end
       end

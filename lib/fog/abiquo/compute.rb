@@ -5,16 +5,29 @@ require 'uri'
 module Fog
   module Compute
     class Abiquo < Fog::Service
+      class LinkModel < Fog::Model
+        def initialize(attributes={})
+          attributes['links'].each do |link|
+            rel = "#{link['rel'].gsub(/\//, '_')}_lnk"
+            if 'edit'.eql?(link['rel'])
+              rel = 'url'
+            end
+            attributes[rel] = link
+          end
+          super
+        end
+      end
       # class BadRequest < Fog::Compute::Cloudstack::Error; end
       # class Unauthorized < Fog::Compute::Cloudstack::Error; end
 
       requires :abiquo_api_url, :abiquo_username, :abiquo_password
+      attr_reader :enterprise
+      attr_reader :user
 
-      request_path 'fog/abiquo/requests/compute'
 
       model_path 'fog/abiquo/models/compute'
-      model :virtualdatacenter
-      collection :virtualdatacenters
+      model :virtual_datacenter
+      collection :virtual_datacenters
       
       model :virtualapp
       collection :virtualapps
@@ -29,6 +42,7 @@ module Fog
       model :remoteservice
       collection :remoteservices
 
+      request_path 'fog/abiquo/requests/compute'
       request :list_virtualdatacenters
       request :get_virtualdatacenter
       request :create_virtualdatacenter
@@ -59,6 +73,15 @@ module Fog
           @api_path = URI.parse(options[:abiquo_api_url]).path
 
           @connection = Fog::Core::Connection.new(options[:abiquo_api_url], options[:abiquo_persistent], {:ssl_verify_peer => false})
+
+          loginresp = request(
+            :expects  => [200],
+            :method   => 'GET',
+            :path     => '/login',
+            :accept   => 'application/vnd.abiquo.user+json'
+          )
+          @enterprise = loginresp['links'].select {|l| l['rel'] == 'enterprise'}.first
+          @user = loginresp
         end
 
         def reload
@@ -77,35 +100,24 @@ module Fog
             # params, headers = authorize_api_keys(params)
           # end
           headers={}
-          # headers.merge!('Accept' => params[:accept]) if params.extract!(:accept)          
           headers.merge!('Accept' => params.delete(:accept)) if params.has_key?(:accept)
           headers.merge!('Content-Type' => params.delete(:content)) if params.has_key?(:content)
+          params[:headers] = headers
           
           # Only basic-auth is supported at the moment, it would be nice auth by cookie
           headers.merge!({'Authorization' => "Basic #{Base64.encode64(@abiquo_username+":"+@abiquo_password).delete("\r\n")}"})
 
-          path = params.delete(:path)
-          path.gsub!(/^.*#{@api_path}/, "") if path.include?(@api_path)
-          body = params.delete(:body)
-          expect = params.delete(:expects)
-          method = params.delete(:method)
-
-          response = issue_request(path, body, params, headers, method, expect)
+          params[:path].gsub!(/^.*#{@api_path}/, "") if params[:path].include?(@api_path)
+          
+          response = issue_request(params)
           response = Fog::JSON.decode(response.body) unless response.body.empty?
           response
         end
 
-        def issue_request(path,body=nil,params={},headers={},method='GET',expects=200)
+        def issue_request(options)
           begin
-            p = @api_path + path
-            resp = @connection.request({
-              :path => p,
-              :query => params,
-              :headers => headers,
-              :method => method,
-              :expects => expects,
-              :body => body
-            })
+            options[:path] = @api_path + options[:path]
+            resp = @connection.request(options)
 
             if resp.data['status'] == 204
               nil
@@ -128,6 +140,14 @@ module Fog
               raise Fog::Compute::Cloudstack::Error, error_text
             end
           end
+        end
+
+        def enterprise
+          @enterprise || {}
+        end
+
+        def user
+          @user || {}
         end
         
         # def login(username,password)
