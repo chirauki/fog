@@ -7,14 +7,53 @@ module Fog
     class Abiquo < Fog::Service
       class LinkModel < Fog::Model
         def initialize(attributes={})
-          attributes['links'].each do |link|
-            rel = "#{link['rel'].gsub(/\//, '_')}_lnk"
-            if 'edit'.eql?(link['rel'])
-              rel = 'url'
+          if not attributes['links'].nil?
+            attributes['links'].each do |link|
+              rel = "#{link['rel'].gsub(/\//, '_')}_lnk"
+              if 'edit'.eql?(link['rel']) or 'self'.eql?(link['rel'])
+                rel = 'url'
+              end
+              attributes[rel] = link
             end
-            attributes[rel] = link
+          end
+          object = super
+          object.enterprise_lnk = service.enterprise if object.respond_to?('enterprise_lnk') and object.enterprise_lnk.nil?
+          object
+        end
+
+        def merge_attributes(new_attributes = {})
+          if not new_attributes['links'].nil?
+            new_attributes['links'].each do |link|
+              rel = "#{link['rel'].gsub(/\//, '_')}_lnk"
+              if 'edit'.eql?(link['rel']) or 'self'.eql?(link['rel'])
+                rel = 'url'
+              end
+              new_attributes[rel] = link
+            end
           end
           super
+        end 
+
+        def to_json
+          att = self.attributes.clone
+          links = []
+          data = {}
+
+          if att.key?(:url)
+            urllnk = att.delete(:url)
+            urllnk['rel'] = "edit"
+            links << urllnk
+          end
+
+          att.keys.each do |opt|
+            if opt.to_s.include? "_lnk"
+              links << att[opt] unless att[opt].nil?
+            else
+              data[opt.to_s] = att[opt] unless att[opt].nil?
+            end
+          end
+          data['links'] = links
+          Fog::JSON.encode(data)
         end
       end
       # class BadRequest < Fog::Compute::Cloudstack::Error; end
@@ -23,9 +62,11 @@ module Fog
       requires :abiquo_api_url, :abiquo_username, :abiquo_password
       attr_reader :enterprise
       attr_reader :user
-
+      attr_reader :config_properties
 
       model_path 'fog/abiquo/models/compute'
+      model :location
+      collection :locations
       model :virtual_datacenter
       collection :virtual_datacenters
       
@@ -43,27 +84,477 @@ module Fog
       collection :remoteservices
 
       request_path 'fog/abiquo/requests/compute'
-      request :list_virtualdatacenters
-      request :get_virtualdatacenter
-      request :create_virtualdatacenter
-      request :list_virtualapps
-      request :get_virtualapp
+      request :delete_admin_datacenters_x
+      request :delete_admin_datacenters_x_backups_x
+      request :delete_admin_datacenters_x_network_x
+      request :delete_admin_datacenters_x_networkservicetypes_x
+      request :delete_admin_datacenters_x_racks_x
+      request :delete_admin_datacenters_x_racks_x_machines_x
+      request :delete_admin_datacenters_x_racks_x_machines_x_virtualmachines
+      request :delete_admin_datacenters_x_remoteservices_x
+      request :delete_admin_datacenters_x_storage_devices_x
+      request :delete_admin_datacenters_x_storage_devices_x_pools_x
+      request :delete_admin_enterprises_x
+      request :delete_admin_enterprises_x_appslib_templateDefinitionLists_x
+      request :delete_admin_enterprises_x_appslib_templateDefinitions_x
+      request :delete_admin_enterprises_x_credentials_x
+      request :delete_admin_enterprises_x_datacenterrepositories_x_virtualmachinetemplates_x
+      request :delete_admin_enterprises_x_limits_x
+      request :delete_admin_enterprises_x_reservedmachines_x
+      request :delete_admin_enterprises_x_users_x
+      request :delete_admin_enterprises_x_users_x_applications_x
+      request :delete_admin_publiccloudregions_x
+      request :delete_admin_publiccloudregions_x_remoteservices_x
+      request :delete_admin_roles_x
+      request :delete_admin_rolesldap_x
+      request :delete_admin_rules_enterpriseExclusions_x
+      request :delete_admin_rules_fitsPolicy_x
+      request :delete_admin_rules_machineLoadLevel_x
+      request :delete_admin_scopes_x
+      request :delete_cloud_locations_x_firewalls_x
+      request :delete_cloud_locations_x_ips_x
+      request :delete_cloud_locations_x_loadbalancers_x
+      request :delete_cloud_locations_x_loadbalancers_x_healthchecks_x
+      request :delete_cloud_locations_x_loadbalancers_x_routingrules_x
+      request :delete_cloud_virtualdatacenters_x
+      request :delete_cloud_virtualdatacenters_x_disks_x
+      request :delete_cloud_virtualdatacenters_x_privatenetworks_x
+      request :delete_cloud_virtualdatacenters_x_virtualappliances_x
+      request :delete_cloud_virtualdatacenters_x_virtualappliances_x_layers_x
+      request :delete_cloud_virtualdatacenters_x_virtualappliances_x_virtualmachines_x
+      request :delete_cloud_virtualdatacenters_x_virtualappliances_x_virtualmachines_x_metadata
+      request :delete_cloud_virtualdatacenters_x_virtualappliances_x_virtualmachines_x_storage_disks
+      request :delete_cloud_virtualdatacenters_x_virtualappliances_x_virtualmachines_x_storage_disks_x
+      request :delete_cloud_virtualdatacenters_x_virtualappliances_x_virtualmachines_x_storage_volumes
+      request :delete_cloud_virtualdatacenters_x_virtualappliances_x_virtualmachines_x_storage_volumes_x
+      request :delete_cloud_virtualdatacenters_x_volumes_x
+      request :delete_config_categories_x
+      request :delete_config_costcodes_x
+      request :delete_config_costcodes_x_currencies
+      request :delete_config_costcodes_x_currencies_x
+      request :delete_config_currencies_x
+      request :delete_config_licenses_x
+      request :delete_config_pricingtemplates_x
+      request :delete_config_properties_x
+      request :delete_login_sessions_users_x
+      request :delete_login_sessions_x_x
+      request :get_admin_datacenters
+      request :get_admin_datacenters_x
+      request :get_admin_datacenters_x_action_checkmachineipmistate
+      request :get_admin_datacenters_x_action_checkmachinestate
+      request :get_admin_datacenters_x_action_discover
+      request :get_admin_datacenters_x_action_enterprises
+      request :get_admin_datacenters_x_action_getlimits
+      request :get_admin_datacenters_x_backups
+      request :get_admin_datacenters_x_backups_x
+      request :get_admin_datacenters_x_hypervisors
+      request :get_admin_datacenters_x_network
+      request :get_admin_datacenters_x_network_action_checkavailability
+      request :get_admin_datacenters_x_network_action_externalips
+      request :get_admin_datacenters_x_network_action_publicips
+      request :get_admin_datacenters_x_network_action_unmanagedips
+      request :get_admin_datacenters_x_network_x
+      request :get_admin_datacenters_x_network_x_configuration
+      request :get_admin_datacenters_x_network_x_configuration_x
+      request :get_admin_datacenters_x_network_x_ips
+      request :get_admin_datacenters_x_network_x_ips_x
+      request :get_admin_datacenters_x_networkservicetypes
+      request :get_admin_datacenters_x_networkservicetypes_x
+      request :get_admin_datacenters_x_racks
+      request :get_admin_datacenters_x_racks_x
+      request :get_admin_datacenters_x_racks_x_deployedvms
+      request :get_admin_datacenters_x_racks_x_machines
+      request :get_admin_datacenters_x_racks_x_machines_action_bookable
+      request :get_admin_datacenters_x_racks_x_machines_x
+      request :get_admin_datacenters_x_racks_x_machines_x_action_checkipmi
+      request :get_admin_datacenters_x_racks_x_machines_x_action_checkipmistate
+      request :get_admin_datacenters_x_racks_x_machines_x_action_checkstate
+      request :get_admin_datacenters_x_racks_x_machines_x_action_nics_refresh
+      request :get_admin_datacenters_x_racks_x_machines_x_action_reenableafterha
+      request :get_admin_datacenters_x_racks_x_machines_x_datastores
+      request :get_admin_datacenters_x_racks_x_machines_x_datastores_action_refresh
+      request :get_admin_datacenters_x_racks_x_machines_x_datastores_x
+      request :get_admin_datacenters_x_racks_x_machines_x_virtualmachines
+      request :get_admin_datacenters_x_racks_x_machines_x_virtualmachines_x
+      request :get_admin_datacenters_x_racks_x_machines_x_virtualmachines_x_action_disk
+      request :get_admin_datacenters_x_racks_x_machines_x_virtualmachines_x_action_nics
+      request :get_admin_datacenters_x_racks_x_machines_x_virtualmachines_x_action_volumes
+      request :get_admin_datacenters_x_racks_x_machines_x_virtualmachines_x_config_rdpaccess
+      request :get_admin_datacenters_x_remoteservices
+      request :get_admin_datacenters_x_remoteservices_x
+      request :get_admin_datacenters_x_remoteservices_x_action_check
+      request :get_admin_datacenters_x_storage_devices
+      request :get_admin_datacenters_x_storage_devices_action_supported
+      request :get_admin_datacenters_x_storage_devices_x
+      request :get_admin_datacenters_x_storage_devices_x_pools
+      request :get_admin_datacenters_x_storage_devices_x_pools_x
+      request :get_admin_datacenters_x_storage_devices_x_pools_x_action_volumes
+      request :get_admin_datacenters_x_storage_tiers
+      request :get_admin_datacenters_x_storage_tiers_x
+      request :get_admin_datacenters_x_storage_tiers_x_enterprises
+      request :get_admin_datacenters_x_storage_tiers_x_pools
+      request :get_admin_enterprises
+      request :get_admin_enterprises_action_requestdownload
+      request :get_admin_enterprises_x
+      request :get_admin_enterprises_x_action_chefelements
+      request :get_admin_enterprises_x_action_externalnetworks
+      request :get_admin_enterprises_x_action_externalnetworks_x
+      request :get_admin_enterprises_x_action_ips
+      request :get_admin_enterprises_x_action_pendingtasks
+      request :get_admin_enterprises_x_action_publicnetworks
+      request :get_admin_enterprises_x_action_publicnetworks_x
+      request :get_admin_enterprises_x_action_requestupload
+      request :get_admin_enterprises_x_action_virtualappliances
+      request :get_admin_enterprises_x_action_virtualdatacenters
+      request :get_admin_enterprises_x_action_virtualmachines
+      request :get_admin_enterprises_x_action_volumes
+      request :get_admin_enterprises_x_appslib_templateDefinitionLists
+      request :get_admin_enterprises_x_appslib_templateDefinitionLists_x
+      request :get_admin_enterprises_x_appslib_templateDefinitionLists_x_actions_repositoryStatus
+      request :get_admin_enterprises_x_appslib_templateDefinitions
+      request :get_admin_enterprises_x_appslib_templateDefinitions_x
+      request :get_admin_enterprises_x_appslib_templateDefinitions_x_actions_repositoryStatus
+      request :get_admin_enterprises_x_credentials
+      request :get_admin_enterprises_x_credentials_x
+      request :get_admin_enterprises_x_datacenterrepositories
+      request :get_admin_enterprises_x_datacenterrepositories_x
+      request :get_admin_enterprises_x_datacenterrepositories_x_tasks
+      request :get_admin_enterprises_x_datacenterrepositories_x_tasks_x
+      request :get_admin_enterprises_x_datacenterrepositories_x_virtualmachinetemplates
+      request :get_admin_enterprises_x_datacenterrepositories_x_virtualmachinetemplates_x
+      request :get_admin_enterprises_x_datacenterrepositories_x_virtualmachinetemplates_x_action_instances
+      request :get_admin_enterprises_x_datacenterrepositories_x_virtualmachinetemplates_x_action_virtualmachines
+      request :get_admin_enterprises_x_datacenterrepositories_x_virtualmachinetemplates_x_conversions
+      request :get_admin_enterprises_x_datacenterrepositories_x_virtualmachinetemplates_x_conversions_x
+      request :get_admin_enterprises_x_datacenterrepositories_x_virtualmachinetemplates_x_conversions_x_tasks
+      request :get_admin_enterprises_x_datacenterrepositories_x_virtualmachinetemplates_x_conversions_x_tasks_x
+      request :get_admin_enterprises_x_datacenterrepositories_x_virtualmachinetemplates_x_tasks
+      request :get_admin_enterprises_x_datacenterrepositories_x_virtualmachinetemplates_x_tasks_x
+      request :get_admin_enterprises_x_limits
+      request :get_admin_enterprises_x_limits_x
+      request :get_admin_enterprises_x_limits_x_action_virtualappliances
+      request :get_admin_enterprises_x_limits_x_datacenter
+      request :get_admin_enterprises_x_limits_x_externalnetworks
+      request :get_admin_enterprises_x_limits_x_externalnetworks_action_default
+      request :get_admin_enterprises_x_limits_x_externalnetworks_x
+      request :get_admin_enterprises_x_limits_x_externalnetworks_x_configuration
+      request :get_admin_enterprises_x_limits_x_externalnetworks_x_configuration_x
+      request :get_admin_enterprises_x_limits_x_externalnetworks_x_ips
+      request :get_admin_enterprises_x_limits_x_externalnetworks_x_ips_x
+      request :get_admin_enterprises_x_limits_x_hypervisors
+      request :get_admin_enterprises_x_properties
+      request :get_admin_enterprises_x_reservedmachines
+      request :get_admin_enterprises_x_users
+      request :get_admin_enterprises_x_users_x
+      request :get_admin_enterprises_x_users_x_action_pendingtasks
+      request :get_admin_enterprises_x_users_x_action_virtualmachines
+      request :get_admin_enterprises_x_users_x_applications
+      request :get_admin_enterprises_x_users_x_applications_x
+      request :get_admin_publiccloudregions
+      request :get_admin_publiccloudregions_x
+      request :get_admin_publiccloudregions_x_enterprises
+      request :get_admin_publiccloudregions_x_enterprises_x
+      request :get_admin_publiccloudregions_x_enterprises_x_virtualmachines
+      request :get_admin_publiccloudregions_x_enterprises_x_virtualmachines_x
+      request :get_admin_publiccloudregions_x_remoteservices
+      request :get_admin_publiccloudregions_x_remoteservices_x
+      request :get_admin_publiccloudregions_x_remoteservices_x_action_check
+      request :get_admin_roles
+      request :get_admin_roles_x
+      request :get_admin_roles_x_action_privileges
+      request :get_admin_rolesldap
+      request :get_admin_rolesldap_x
+      request :get_admin_rules
+      request :get_admin_rules_enterpriseExclusions
+      request :get_admin_rules_enterpriseExclusions_x
+      request :get_admin_rules_fitsPolicy
+      request :get_admin_rules_fitsPolicy_x
+      request :get_admin_rules_machineLoadLevel
+      request :get_admin_rules_machineLoadLevel_x
+      request :get_admin_scopes
+      request :get_admin_scopes_x
+      request :get_admin_statistics_cloudusage
+      request :get_admin_statistics_cloudusage_actions_total
+      request :get_admin_statistics_cloudusage_x
+      request :get_admin_statistics_enterpriseresources
+      request :get_admin_statistics_enterpriseresources_actions_total
+      request :get_admin_statistics_enterpriseresources_x
+      request :get_admin_statistics_vappsresources
+      request :get_admin_statistics_vdcsresources
+      request :get_cloud_locations
+      request :get_cloud_locations_pcr
+      request :get_cloud_locations_x
+      request :get_cloud_locations_x_availabilityzones
+      request :get_cloud_locations_x_availabilityzones_x
+      request :get_cloud_locations_x_firewalls
+      request :get_cloud_locations_x_firewalls_x
+      request :get_cloud_locations_x_firewalls_x_rules
+      request :get_cloud_locations_x_hardwareprofiles
+      request :get_cloud_locations_x_hardwareprofiles_x
+      request :get_cloud_locations_x_ips
+      request :get_cloud_locations_x_ips_x
+      request :get_cloud_locations_x_loadbalancers
+      request :get_cloud_locations_x_loadbalancers_addresses
+      request :get_cloud_locations_x_loadbalancers_addresses_x
+      request :get_cloud_locations_x_loadbalancers_x
+      request :get_cloud_locations_x_loadbalancers_x_addresses
+      request :get_cloud_locations_x_loadbalancers_x_healthchecks
+      request :get_cloud_locations_x_loadbalancers_x_healthchecks_x
+      request :get_cloud_locations_x_loadbalancers_x_healthstates
+      request :get_cloud_locations_x_loadbalancers_x_routingrules
+      request :get_cloud_locations_x_loadbalancers_x_routingrules_x
+      request :get_cloud_locations_x_loadbalancers_x_virtualmachines
+      request :get_cloud_locations_x_sslcertificates
+      request :get_cloud_locations_x_sslcertificates_x
+      request :get_cloud_locations_x_templates
+      request :get_cloud_locations_x_templates_x
+      request :get_cloud_virtualdatacenters
+      request :get_cloud_virtualdatacenters_x
+      request :get_cloud_virtualdatacenters_x_action_defaultvlan
+      request :get_cloud_virtualdatacenters_x_action_externalips
+      request :get_cloud_virtualdatacenters_x_action_privateips
+      request :get_cloud_virtualdatacenters_x_action_templates
+      request :get_cloud_virtualdatacenters_x_action_unmanagedips
+      request :get_cloud_virtualdatacenters_x_action_virtualmachines
+      request :get_cloud_virtualdatacenters_x_disks
+      request :get_cloud_virtualdatacenters_x_disks_x
+      request :get_cloud_virtualdatacenters_x_firewalls
+      request :get_cloud_virtualdatacenters_x_loadbalancers
+      request :get_cloud_virtualdatacenters_x_privatenetworks
+      request :get_cloud_virtualdatacenters_x_privatenetworks_x
+      request :get_cloud_virtualdatacenters_x_privatenetworks_x_configuration
+      request :get_cloud_virtualdatacenters_x_privatenetworks_x_configuration_x
+      request :get_cloud_virtualdatacenters_x_privatenetworks_x_ips
+      request :get_cloud_virtualdatacenters_x_privatenetworks_x_ips_x
+      request :get_cloud_virtualdatacenters_x_privatenetworks_x_loadbalancers
+      request :get_cloud_virtualdatacenters_x_publicips_purchased
+      request :get_cloud_virtualdatacenters_x_publicips_purchased_x
+      request :get_cloud_virtualdatacenters_x_publicips_topurchase
+      request :get_cloud_virtualdatacenters_x_publicips_topurchase_x
+      request :get_cloud_virtualdatacenters_x_publicvlans
+      request :get_cloud_virtualdatacenters_x_publicvlans_x
+      request :get_cloud_virtualdatacenters_x_tiers
+      request :get_cloud_virtualdatacenters_x_tiers_x
+      request :get_cloud_virtualdatacenters_x_virtualappliances
+      request :get_cloud_virtualdatacenters_x_virtualappliances_x
+      request :get_cloud_virtualdatacenters_x_virtualappliances_x_action_price
+      request :get_cloud_virtualdatacenters_x_virtualappliances_x_layers
+      request :get_cloud_virtualdatacenters_x_virtualappliances_x_layers_x
+      request :get_cloud_virtualdatacenters_x_virtualappliances_x_state
+      request :get_cloud_virtualdatacenters_x_virtualappliances_x_virtualmachines
+      request :get_cloud_virtualdatacenters_x_virtualappliances_x_virtualmachines_x
+      request :get_cloud_virtualdatacenters_x_virtualappliances_x_virtualmachines_x_config_bootstrap
+      request :get_cloud_virtualdatacenters_x_virtualappliances_x_virtualmachines_x_config_rdpaccess
+      request :get_cloud_virtualdatacenters_x_virtualappliances_x_virtualmachines_x_config_runlist
+      request :get_cloud_virtualdatacenters_x_virtualappliances_x_virtualmachines_x_firewalls
+      request :get_cloud_virtualdatacenters_x_virtualappliances_x_virtualmachines_x_loadbalancers
+      request :get_cloud_virtualdatacenters_x_virtualappliances_x_virtualmachines_x_metadata
+      request :get_cloud_virtualdatacenters_x_virtualappliances_x_virtualmachines_x_metrics
+      request :get_cloud_virtualdatacenters_x_virtualappliances_x_virtualmachines_x_network_configurations
+      request :get_cloud_virtualdatacenters_x_virtualappliances_x_virtualmachines_x_network_configurations_x
+      request :get_cloud_virtualdatacenters_x_virtualappliances_x_virtualmachines_x_network_nics
+      request :get_cloud_virtualdatacenters_x_virtualappliances_x_virtualmachines_x_state
+      request :get_cloud_virtualdatacenters_x_virtualappliances_x_virtualmachines_x_storage_disks
+      request :get_cloud_virtualdatacenters_x_virtualappliances_x_virtualmachines_x_storage_disks_x
+      request :get_cloud_virtualdatacenters_x_virtualappliances_x_virtualmachines_x_storage_volumes
+      request :get_cloud_virtualdatacenters_x_virtualappliances_x_virtualmachines_x_storage_volumes_x
+      request :get_cloud_virtualdatacenters_x_virtualappliances_x_virtualmachines_x_tasks
+      request :get_cloud_virtualdatacenters_x_virtualappliances_x_virtualmachines_x_tasks_x
+      request :get_cloud_virtualdatacenters_x_volumes
+      request :get_cloud_virtualdatacenters_x_volumes_action_statefulcandidates
+      request :get_cloud_virtualdatacenters_x_volumes_x
+      request :get_cloud_virtualdatacenters_x_volumes_x_action_initiatormappings
+      request :get_cloud_virtualdatacenters_x_volumes_x_action_initiatormappings_x
+      request :get_cloud_virtualmachines
+      request :get_config_backups
+      request :get_config_backups_x
+      request :get_config_categories
+      request :get_config_categories_x
+      request :get_config_costcodes
+      request :get_config_costcodes_x
+      request :get_config_costcodes_x_currencies
+      request :get_config_costcodes_x_currencies_x
+      request :get_config_currencies
+      request :get_config_currencies_x
+      request :get_config_diskformattypes
+      request :get_config_diskformattypes_x
+      request :get_config_hypervisortypes
+      request :get_config_hypervisortypes_x
+      request :get_config_hypervisortypes_x_metrics
+      request :get_config_hypervisortypes_x_regions
+      request :get_config_hypervisortypes_x_regions_x
+      request :get_config_licenses
+      request :get_config_licenses_x
+      request :get_config_pricingtemplates
+      request :get_config_pricingtemplates_x
+      request :get_config_pricingtemplates_x_costcodes
+      request :get_config_pricingtemplates_x_costcodes_x
+      request :get_config_pricingtemplates_x_tiers
+      request :get_config_pricingtemplates_x_tiers_x
+      request :get_config_privileges
+      request :get_config_privileges_x
+      request :get_config_properties
+      request :get_config_properties_x
+      request :get_events
+      request :get_events_x
+      request :get_login
+      request :get_login_sessions
+      request :get_login_sessions_x
+      request :get_login_sessions_x_x
+      request :get_statistics_cloudusage
+      request :get_statistics_cloudusage_actions_total
+      request :get_statistics_cloudusage_x
+      request :get_statistics_enterpriseresources
+      request :get_statistics_enterpriseresources_actions_total
+      request :get_statistics_enterpriseresources_x
+      request :get_statistics_vappsresources
+      request :get_statistics_vdcsresources
+      request :get_version
+      request :post_admin_datacenters
+      request :post_admin_datacenters_x_backups
+      request :post_admin_datacenters_x_network
+      request :post_admin_datacenters_x_network_x_ips
+      request :post_admin_datacenters_x_networkservicetypes
+      request :post_admin_datacenters_x_racks
+      request :post_admin_datacenters_x_racks_x_machines
+      request :post_admin_datacenters_x_racks_x_machines_x_action_sendmail
+      request :post_admin_datacenters_x_racks_x_machines_x_virtualmachines_x_action_capture
+      request :post_admin_datacenters_x_racks_x_machines_x_virtualmachines_x_action_sendmail
+      request :post_admin_datacenters_x_remoteservices
+      request :post_admin_datacenters_x_storage_devices
+      request :post_admin_datacenters_x_storage_devices_x_pools
+      request :post_admin_enterprises
+      request :post_admin_enterprises_x_appslib_templateDefinitionLists
+      request :post_admin_enterprises_x_appslib_templateDefinitions
+      request :post_admin_enterprises_x_appslib_templateDefinitions_x_actions_repositoryInstall
+      request :post_admin_enterprises_x_appslib_templateDefinitions_x_actions_repositoryUninstall
+      request :post_admin_enterprises_x_credentials
+      request :post_admin_enterprises_x_datacenterrepositories_x_virtualmachinetemplates
+      request :post_admin_enterprises_x_datacenterrepositories_x_virtualmachinetemplates_x_action_deletefile
+      request :post_admin_enterprises_x_datacenterrepositories_x_virtualmachinetemplates_x_conversions
+      request :post_admin_enterprises_x_limits
+      request :post_admin_enterprises_x_reservedmachines
+      request :post_admin_enterprises_x_reservedmachines_machine
+      request :post_admin_enterprises_x_users
+      request :post_admin_enterprises_x_users_x_applications
+      request :post_admin_publiccloudregions
+      request :post_admin_publiccloudregions_x_remoteservices
+      request :post_admin_roles
+      request :post_admin_rolesldap
+      request :post_admin_rules
+      request :post_admin_rules_enterpriseExclusions
+      request :post_admin_rules_fitsPolicy
+      request :post_admin_rules_machineLoadLevel
+      request :post_admin_scopes
+      request :post_cloud_locations_x_firewalls
+      request :post_cloud_locations_x_ips
+      request :post_cloud_locations_x_loadbalancers
+      request :post_cloud_locations_x_loadbalancers_x_healthchecks
+      request :post_cloud_locations_x_loadbalancers_x_routingrules
+      request :post_cloud_virtualdatacenters
+      request :post_cloud_virtualdatacenters_x_disks
+      request :post_cloud_virtualdatacenters_x_privatenetworks
+      request :post_cloud_virtualdatacenters_x_privatenetworks_x_ips
+      request :post_cloud_virtualdatacenters_x_virtualappliances
+      request :post_cloud_virtualdatacenters_x_virtualappliances_x_action_deploy
+      request :post_cloud_virtualdatacenters_x_virtualappliances_x_action_undeploy
+      request :post_cloud_virtualdatacenters_x_virtualappliances_x_layers
+      request :post_cloud_virtualdatacenters_x_virtualappliances_x_virtualmachines
+      request :post_cloud_virtualdatacenters_x_virtualappliances_x_virtualmachines_x_action_deploy
+      request :post_cloud_virtualdatacenters_x_virtualappliances_x_virtualmachines_x_action_instance
+      request :post_cloud_virtualdatacenters_x_virtualappliances_x_virtualmachines_x_action_reset
+      request :post_cloud_virtualdatacenters_x_virtualappliances_x_virtualmachines_x_action_undeploy
+      request :post_cloud_virtualdatacenters_x_virtualappliances_x_virtualmachines_x_config_runlist
+      request :post_cloud_virtualdatacenters_x_virtualappliances_x_virtualmachines_x_disablemonitoring
+      request :post_cloud_virtualdatacenters_x_virtualappliances_x_virtualmachines_x_enablemonitoring
+      request :post_cloud_virtualdatacenters_x_virtualappliances_x_virtualmachines_x_storage_disks
+      request :post_cloud_virtualdatacenters_x_virtualappliances_x_virtualmachines_x_storage_volumes
+      request :post_cloud_virtualdatacenters_x_virtualappliances_x_virtualmachines_x_tasks_x_action_ack
+      request :post_cloud_virtualdatacenters_x_virtualappliances_x_virtualmachines_x_tasks_x_action_cancel
+      request :post_cloud_virtualdatacenters_x_virtualappliances_x_virtualmachines_x_tasks_x_action_continue
+      request :post_cloud_virtualdatacenters_x_volumes
+      request :post_cloud_virtualdatacenters_x_volumes_x_action_move
+      request :post_config_action_remoteservicecheck
+      request :post_config_categories
+      request :post_config_costcodes
+      request :post_config_costcodes_x_currencies
+      request :post_config_currencies
+      request :post_config_hypervisortypes_x_action_checkcredentials
+      request :post_config_licenses
+      request :post_config_pricingtemplates
+      request :post_config_pricingtemplates_x_costcodes
+      request :post_config_pricingtemplates_x_tiers
+      request :post_config_properties
+      request :post_logout
+      request :put_admin_datacenters_x
+      request :put_admin_datacenters_x_action_updateusedresources
+      request :put_admin_datacenters_x_backups
+      request :put_admin_datacenters_x_backups_x
+      request :put_admin_datacenters_x_network_x
+      request :put_admin_datacenters_x_network_x_ips
+      request :put_admin_datacenters_x_network_x_ips_x
+      request :put_admin_datacenters_x_networkservicetypes_x
+      request :put_admin_datacenters_x_racks_x
+      request :put_admin_datacenters_x_racks_x_machines_x
+      request :put_admin_datacenters_x_racks_x_machines_x_datastores_x
+      request :put_admin_datacenters_x_remoteservices_x
+      request :put_admin_datacenters_x_storage_devices_x
+      request :put_admin_datacenters_x_storage_devices_x_pools_x
+      request :put_admin_datacenters_x_storage_tiers_x
+      request :put_admin_datacenters_x_storage_tiers_x_action_allowallenterprises
+      request :put_admin_datacenters_x_storage_tiers_x_action_restrictallenterprises
+      request :put_admin_enterprises_x
+      request :put_admin_enterprises_x_appslib_templateDefinitionLists_x
+      request :put_admin_enterprises_x_appslib_templateDefinitions_x
+      request :put_admin_enterprises_x_credentials_x
+      request :put_admin_enterprises_x_datacenterrepositories_x_actions_refresh
+      request :put_admin_enterprises_x_datacenterrepositories_x_virtualmachinetemplates_x
+      request :put_admin_enterprises_x_datacenterrepositories_x_virtualmachinetemplates_x_conversions_x
+      request :put_admin_enterprises_x_limits_x
+      request :put_admin_enterprises_x_limits_x_externalnetworks_action_default
+      request :put_admin_enterprises_x_limits_x_externalnetworks_x_action_default
+      request :put_admin_enterprises_x_limits_x_externalnetworks_x_ips_x
+      request :put_admin_enterprises_x_properties
+      request :put_admin_enterprises_x_users_x
+      request :put_admin_publiccloudregions_x
+      request :put_admin_publiccloudregions_x_remoteservices_x
+      request :put_admin_roles_x
+      request :put_admin_rolesldap_x
+      request :put_admin_scopes_x
+      request :put_cloud_locations_x_firewalls_x
+      request :put_cloud_locations_x_firewalls_x_rules
+      request :put_cloud_locations_x_loadbalancers_x
+      request :put_cloud_locations_x_loadbalancers_x_healthchecks_x
+      request :put_cloud_locations_x_loadbalancers_x_routingrules_x
+      request :put_cloud_locations_x_loadbalancers_x_virtualmachines
+      request :put_cloud_virtualdatacenters_x
+      request :put_cloud_virtualdatacenters_x_action_defaultvlan
+      request :put_cloud_virtualdatacenters_x_disks_x
+      request :put_cloud_virtualdatacenters_x_privatenetworks_x
+      request :put_cloud_virtualdatacenters_x_publicips_purchased_x
+      request :put_cloud_virtualdatacenters_x_publicips_topurchase_x
+      request :put_cloud_virtualdatacenters_x_virtualappliances_x
+      request :put_cloud_virtualdatacenters_x_virtualappliances_x_layers_x
+      request :put_cloud_virtualdatacenters_x_virtualappliances_x_virtualmachines_x
+      request :put_cloud_virtualdatacenters_x_virtualappliances_x_virtualmachines_x_firewalls
+      request :put_cloud_virtualdatacenters_x_virtualappliances_x_virtualmachines_x_metadata
+      request :put_cloud_virtualdatacenters_x_virtualappliances_x_virtualmachines_x_state
+      request :put_cloud_virtualdatacenters_x_virtualappliances_x_virtualmachines_x_storage_disks
+      request :put_cloud_virtualdatacenters_x_virtualappliances_x_virtualmachines_x_storage_volumes
+      request :put_cloud_virtualdatacenters_x_volumes_x
+      request :put_config_categories_x
+      request :put_config_costcodes_x
+      request :put_config_costcodes_x_currencies
+      request :put_config_costcodes_x_currencies_x
+      request :put_config_currencies_x
+      request :put_config_pricingtemplates_x
+      request :put_config_pricingtemplates_x_costcodes
+      request :put_config_pricingtemplates_x_costcodes_x
+      request :put_config_pricingtemplates_x_tiers
+      request :put_config_pricingtemplates_x_tiers_x
+      request :put_config_properties
+      request :put_config_properties_x
 
-      request :list_datacenters
-      request :get_datacenter
-      request :create_datacenter
-      request :list_remoteservices
-      request :get_remoteservice
-      request :create_remoteservice
-      request :check_remoteservice
-      request :list_racks
-      request :get_rack
-      request :create_rack
-
-      request :delete_entity
-
-      request :get_virtualmachine
-      request :list_virtualmachines
 
       class Real
         def initialize(options={})
@@ -82,6 +573,14 @@ module Fog
           )
           @enterprise = loginresp['links'].select {|l| l['rel'] == 'enterprise'}.first
           @user = loginresp
+
+          propsreq = request(
+            :expects  => [200],
+            :method   => 'GET',
+            :path     => '/config/properties',
+            :accept   => 'application/vnd.abiquo.systemproperties+json'
+          )
+          @config_properties = propsreq
         end
 
         def reload
@@ -91,27 +590,46 @@ module Fog
         def request(params)
           params.reject!{|k,v| v.nil?}
 
-          # params.merge!('response' => 'json')
-
-          # This should be changed to check cookie auth
-          # if has_session?
-            # params, headers = authorize_session(params)
-          # elsif has_keys?
-            # params, headers = authorize_api_keys(params)
-          # end
           headers={}
           headers.merge!('Accept' => params.delete(:accept)) if params.has_key?(:accept)
           headers.merge!('Content-Type' => params.delete(:content)) if params.has_key?(:content)
-          params[:headers] = headers
-          
+
           # Only basic-auth is supported at the moment, it would be nice auth by cookie
           headers.merge!({'Authorization' => "Basic #{Base64.encode64(@abiquo_username+":"+@abiquo_password).delete("\r\n")}"})
-
+          
+          params[:headers] = headers
+          
           params[:path].gsub!(/^.*#{@api_path}/, "") if params[:path].include?(@api_path)
           
           response = issue_request(params)
           response = Fog::JSON.decode(response.body) unless response.body.empty?
-          response
+
+          if not response['links'].nil? and response['links'].select {|l| l['rel'].eql? "next" }.count > 0
+            items = []
+            items = items + response['collection'] if not response['collection'].nil?
+            
+            loop do
+              next_url = response['links'].select {|l| l['rel'].eql? "next" }.first['href']
+              params[:path] = next_url.gsub!(/^.*#{@api_path}/, "") if next_url.include?(@api_path)
+              params[:headers] = headers
+              response = issue_request(params)
+              response = Fog::JSON.decode(response.body) unless response.body.empty?
+              items = items + response['collection'] if not response['collection'].nil?
+              
+              break if response['links'].select {|l| l['rel'].eql? "next" }.count == 0
+            end
+
+            items
+          else
+            if not response['collection'].nil?
+              response['collection']
+            else
+              response
+            end
+          end
+          # response.flatten!
+          #response
+          #items
         end
 
         def issue_request(options)
@@ -133,7 +651,7 @@ module Fog
 
             case error_code
             when 401
-              raise Fog::Compute::Cloudstack::Unauthorized, error_text
+              raise Fog::Compute::Abiquo::Unauthorized, error_text
             when 431
               raise Fog::Compute::Cloudstack::BadRequest, error_text
             else
@@ -148,6 +666,10 @@ module Fog
 
         def user
           @user || {}
+        end
+
+        def config_properties
+          @config_properties || {}
         end
         
         # def login(username,password)

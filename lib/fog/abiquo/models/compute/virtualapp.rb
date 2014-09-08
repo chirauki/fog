@@ -10,6 +10,7 @@ module Fog
         attribute :publicApp
         attribute :state
         
+        attribute :url
         attribute :links
 
         def reload
@@ -23,6 +24,9 @@ module Fog
           @virtualmachines ||= Fog::Compute::Abiquo::Virtualmachines.new :virtualmachines_lnk => self.links.select {|l| l['rel'] == 'virtualmachines' }.first['href'], :service => service 
         end # method virtualmachines
 
+        def delete
+          service.delete(self.url['href'])
+        end
       end # Class vApp
     end # Class Abiquo
   end # module Compute

@@ -9,16 +9,24 @@ module Fog
 
         def all(options = {})
           @vapps_lnk ||= attributes[:vapps_lnk]
-          response = service.list_virtualapps(@vapps_lnk)
+          response = service.get(@vapps_lnk['href'], @vapps_lnk['type'])
           vapps_data = response["collection"] || []
           load(vapps_data)
         end
 
         def get(vapp_id)
+          @vapp_lnk ||= attributes[:vapp_lnk]
+          response = service.get(@vapps_lnk['href'], @vapps_lnk['type'])
+          virtualappliance_data = response
+          new(virtualappliance_data)
+        end
+
+        def create(name)
           @vapps_lnk ||= attributes[:vapps_lnk]
-          response = service.get_virtualapp(:vapps_lnk => @vapps_lnk, :vapp_id => vapp_id)
-          virtualdatacenter_data = response
-          new(virtualdatacenter_data)
+          params = { :name => name }
+          response = service.post(@vapps_lnk['href'],
+                                  'application/vnd.abiquo.virtualappliance+json',
+                                  Fog::JSON.encode(params))
         end
       end
     end
