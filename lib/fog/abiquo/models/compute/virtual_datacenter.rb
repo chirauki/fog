@@ -22,6 +22,9 @@ module Fog
 
         attribute :url
         attribute :enterprise_lnk
+        attribute :enterprise_id
+        attribute :location_lnk
+        attribute :location_id
         attribute :privatenetworks_lnk
         attribute :network_lnk
         attribute :virtualappliances_lnk
@@ -37,36 +40,39 @@ module Fog
         attribute :statefulcandidates_lnk
         attribute :tiers_lnk
         attribute :templates_lnk
+        attribute :virtualmachines_lnk
         attribute :firewalls_lnk
-        attribute :location_lnk
+        attribute :loadbalancers_lnk
 
         def reload
           requires :id
-          service.get(self.url, 'application/vnd.abiquo.virtualdatacenter+json')
+          response = service.get_cloud_virtualdatacenters_x(self.id)
+          merge_attributes(response)
         end
 
         def save
           requires :name, :hypervisorType, :enterprise_lnk, :location_lnk
           if self.id
-            resp = service.put(self.url.href,
-                              'application/vnd.abiquo.virtualdatacenter+json',
-                              self.to_json )
-            merge_attributes(resp.body)
+            resp = service.put_cloud_virtualdatancenters_x(self.id,
+                                                          self.to_json)
           else
-            resp = service.post('/cloud/virtualdatacenters',
-                                'application/vnd.abiquo.virtualdatacenter+json',
-                                self.to_json)
-            merge_attributes(resp)
+            resp = service.post_cloud_virtualdatacenters(self.to_json)
           end
+          merge_attributes(resp)
         end
 
         def delete
-          service.delete(self.url['href'])
+          requires :id
+          service.delete_cloud_virtualdatacenters_x(self.id)
         end
 
         def virtualapps
           requires :id
-          @virtualapps ||= Fog::Compute::Abiquo::Virtualapps.new :vapps_lnk => self.virtualappliances_lnk, :service => service
+          @virtualapps ||= Fog::Compute::Abiquo::Virtualapps.new :vdc_id => self.id, :service => service
+        end
+
+        def templates
+          @virtualmahinetemplates ||= Fog::Compute::Abiquo::VirtualMachineTemplates.new :vdc_id => self.id, :service => service
         end
       end # Class VDC
     end # Class Abiquo

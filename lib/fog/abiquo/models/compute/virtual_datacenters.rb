@@ -8,16 +8,25 @@ module Fog
         model Fog::Compute::Abiquo::VirtualDatacenter
 
         def all(options = {})
-          response = service.get('/cloud/virtualdatacenters',
-                                  'application/vnd.abiquo.virtualdatacenters+json')
-          vdcs_data = response["collection"] || []
-          load(vdcs_data)
+          response = service.get_cloud_virtualdatacenters
+          load(response)
         end
 
-        def get(vdc_id)
-          response = service.get_virtualdatacenter(vdc_id)
-          virtualdatacenter_data = response
-          new(virtualdatacenter_data)
+        def get(id)
+          response = service.get_cloud_virtualdatacenters_x(id)
+          new(response)
+        end
+
+        def where(args={})
+          items = service.get_cloud_virtualdatacenters
+          result_items = []
+
+          return load(items) if args.empty?
+          
+          args.keys.each do |arg|
+            result_items += items.select {|i| i[arg.to_s] == args[arg]}
+          end
+          load(result_items)
         end
 
         def create(name, location, hypervisor, net = {}, limits = {})

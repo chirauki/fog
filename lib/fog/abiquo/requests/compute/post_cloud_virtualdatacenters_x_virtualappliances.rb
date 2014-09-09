@@ -8,7 +8,7 @@ module Fog
             :method   => 'POST',
             :path     => "/cloud/virtualdatacenters/#{virtualdatacenter}/virtualappliances",
             :accept   => "application/vnd.abiquo.virtualappliance+json",
-            :content  => "application/vnd.mv-virtualappliance+json",
+            :content  => "application/vnd.abiquo.virtualappliance+json",
             :body     => payload,
             :query    => options
           )

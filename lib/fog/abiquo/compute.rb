@@ -14,6 +14,9 @@ module Fog
                 rel = 'url'
               end
               attributes[rel] = link
+
+              idrel = "#{link['rel'].gsub(/\//, '_')}_id"
+              attributes[idrel] = link['href'].split('/').last
             end
           end
           object = super
@@ -69,7 +72,8 @@ module Fog
       collection :locations
       model :virtual_datacenter
       collection :virtual_datacenters
-      
+      model :virtualmachinetemplate
+      collection :virtualmachinetemplates
       model :virtualapp
       collection :virtualapps
 
@@ -624,12 +628,9 @@ module Fog
             if not response['collection'].nil?
               response['collection']
             else
-              response
+              response.nil? ? nil : response
             end
           end
-          # response.flatten!
-          #response
-          #items
         end
 
         def issue_request(options)

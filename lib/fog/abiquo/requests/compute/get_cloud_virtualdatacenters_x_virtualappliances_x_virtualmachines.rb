@@ -7,7 +7,7 @@ module Fog
             :expects  => [200],
             :method   => 'GET',
             :path     => "/cloud/virtualdatacenters/#{virtualdatacenter}/virtualappliances/#{virtualappliance}/virtualmachines",
-            :accept   => "application/vnd.abiquo.virtualmachineswithnode+json",
+            :accept   => "application/vnd.abiquo.virtualmachines+json",
             :query    => options
           )
         end

@@ -1,7 +1,7 @@
 module Fog
   module Compute
     class Abiquo
-      class Virtualapp < Fog::Model
+      class Virtualapp < Fog::Compute::Abiquo::LinkModel
         identity  :id
 
         attribute :error
@@ -11,21 +11,49 @@ module Fog
         attribute :state
         
         attribute :url
-        attribute :links
+        
+        attribute :virtualdatacenter_lnk
+        attribute :virtualdatacenter_id
+        attribute :enterprise_lnk
+        attribute :enterprise_id
+        attribute :virtualmachines_lnk
+        attribute :state_lnk
+        attribute :undeploy_lnk
+        attribute :deploy_lnk
+        attribute :price_lnk
+        attribute :layers_lnk
 
         def reload
-          requires :id
-          mylnk = self.links.select {|l| l['rel'] == 'edit'}.first['href']
-          service.get_virtualapp(mylnk)
-        end # method reload
+          requires :id, :virtualdatacenter_id
+          response = service.get_cloud_virtualdatacenters_x_virtualappliances_x(self.virtualdatacenter_id,
+                                                                                self.id)
+          merge_attributes(response)
+        end 
+
+        def save
+          requires :name
+          if self.id
+            resp = service.put_cloud_virtualdatancenters_x_virtualappliances_x(self.virtualdatacenter_id,
+                                                          self.id,
+                                                          self.to_json)
+          else
+            resp = service.post_cloud_virtualdatacenters_x_virtualappliances(self.virtualdatacenter_id,
+                                                          self.to_json)
+          end
+          merge_attributes(resp)
+        end
 
         def virtualmachines
-          requires :id
-          @virtualmachines ||= Fog::Compute::Abiquo::Virtualmachines.new :virtualmachines_lnk => self.links.select {|l| l['rel'] == 'virtualmachines' }.first['href'], :service => service 
+          requires :id, :virtualdatacenter_id
+          @virtualmachines ||= Fog::Compute::Abiquo::Virtualmachines.new :vdc_id => self.virtualdatacenter_id,
+                                                                         :vapp_id => self.id,
+                                                                         :service => service 
         end # method virtualmachines
 
         def delete
-          service.delete(self.url['href'])
+          requires :id
+          service.delete_cloud_virtualdatacenters_x_virtualappliances_x(self.virtualdatacenter_id,
+                                                                        self.id)
         end
       end # Class vApp
     end # Class Abiquo
