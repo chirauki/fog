@@ -76,9 +76,10 @@ module Fog
       collection :virtualmachinetemplates
       model :virtualapp
       collection :virtualapps
-
       model :virtualmachine
       collection :virtualmachines
+      model :task
+      collection :tasks
 
       model :datacenter
       collection :datacenters
