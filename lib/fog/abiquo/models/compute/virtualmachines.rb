@@ -35,7 +35,7 @@ module Fog
           load(result_items)
         end
 
-        def create(template, params)
+        def create(template, params={})
           vdc_id ||= attributes[:vdc_id]
           vapp_id ||= attributes[:vapp_id]
           
