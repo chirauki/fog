@@ -10,10 +10,9 @@ module Fog
         def all(options = {})
           locations = []
           response = service.get_cloud_locations
-          locations += response["collection"]
+          locations += response
           response = service.get_cloud_locations_pcr
-          locations += response["collection"]
-          binding.pry
+          locations += response
           load(locations)
         end
 

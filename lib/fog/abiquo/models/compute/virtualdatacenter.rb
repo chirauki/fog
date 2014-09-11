@@ -43,6 +43,7 @@ module Fog
         attribute :virtualmachines_lnk
         attribute :firewalls_lnk
         attribute :loadbalancers_lnk
+        attribute :region_lnk
 
         def reload
           requires :id
@@ -66,9 +67,9 @@ module Fog
           service.delete_cloud_virtualdatacenters_x(self.id)
         end
 
-        def virtualapps
+        def virtualappliances
           requires :id
-          @virtualapps ||= Fog::Compute::Abiquo::Virtualapps.new :vdc_id => self.id, :service => service
+          @virtualapps ||= Fog::Compute::Abiquo::VirtualAppliances.new :vdc_id => self.id, :service => service
         end
 
         def templates

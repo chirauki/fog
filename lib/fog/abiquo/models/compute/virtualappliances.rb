@@ -1,11 +1,11 @@
 require 'fog/core/collection'
-require 'fog/abiquo/models/compute/virtualapp'
+require 'fog/abiquo/models/compute/virtualappliance'
 
 module Fog
   module Compute
     class Abiquo
-      class Virtualapps < Fog::Collection
-        model Fog::Compute::Abiquo::Virtualapp
+      class VirtualAppliances < Fog::Collection
+        model Fog::Compute::Abiquo::VirtualAppliance
 
         def all(options = {})
           vdc_id ||= attributes[:vdc_id]

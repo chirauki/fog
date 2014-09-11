@@ -35,7 +35,7 @@ module Fog
           load(result_items)
         end
 
-        def create(template, cpu=nil, ram=nil)
+        def create(template, params)
           vdc_id ||= attributes[:vdc_id]
           vapp_id ||= attributes[:vapp_id]
           
@@ -45,8 +45,18 @@ module Fog
           object.virtualdatacenter_id = vdc_id
           object.virtualappliance_id = vapp_id
           object.virtualmachinetemplate_lnk = template_lnk
-          object.cpu = cpu if not cpu.nil?
-          object.ram = ram if not ram.nil?
+
+          vdc = service.virtualdatacenters.get(vdc_id)
+          if vdc.region_lnk.nil?
+            object.cpu = params[:cpu] if not params[:cpu].nil?
+            object.ram = params[:ram] if not params[:ram].nil?
+          else
+            raise "Missing hardwareprofile param." if params[:hardwareprofile].nil?
+            hwproflnk = params[:hardwareprofile].url
+            hwproflnk['rel'] = 'hardwareprofile'
+            object.hardwareprofile_lnk = hwproflnk
+          end
+            
           object.save
           object
         end

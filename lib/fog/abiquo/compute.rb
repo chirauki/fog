@@ -70,12 +70,14 @@ module Fog
       model_path 'fog/abiquo/models/compute'
       model :location
       collection :locations
-      model :virtual_datacenter
-      collection :virtual_datacenters
+      model :hardwareprofile
+      collection :hardwareprofiles
+      model :virtualdatacenter
+      collection :virtualdatacenters
       model :virtualmachinetemplate
       collection :virtualmachinetemplates
-      model :virtualapp
-      collection :virtualapps
+      model :virtualappliance
+      collection :virtualappliances
       model :virtualmachine
       collection :virtualmachines
       model :task

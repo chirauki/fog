@@ -54,6 +54,8 @@ module Fog
         attribute :location_id
         attribute :machine_lnk
         attribute :machine_id
+        attribute :hardwareprofile_lnk
+        attribute :hardwareprofile_id
 
         def reload
           requires :id, :virtualappliance_id, :virtualdatacenter_id
@@ -108,7 +110,7 @@ module Fog
 
         def delete
           requires :id, :virtualappliance_id, :virtualdatacenter_id
-          service.delete.cloud_virtualdatacenters_x_virtualappliances_x_virtualmachines_x(self.virtualdatacenter_id,
+          service.delete_cloud_virtualdatacenters_x_virtualappliances_x_virtualmachines_x(self.virtualdatacenter_id,
                                                                                       self.virtualappliance_id,
                                                                                       self.id)
         end

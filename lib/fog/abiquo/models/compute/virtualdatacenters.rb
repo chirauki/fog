@@ -1,10 +1,10 @@
 require 'fog/core/collection'
-require 'fog/abiquo/models/compute/virtual_datacenter'
+require 'fog/abiquo/models/compute/virtualdatacenter'
 
 module Fog
   module Compute
     class Abiquo
-      class VirtualDatacenters < Fog::Collection
+      class Virtualdatacenters < Fog::Collection
         model Fog::Compute::Abiquo::VirtualDatacenter
 
         def all(options = {})

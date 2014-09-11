@@ -12,10 +12,25 @@ module Fog
         attribute :links
 
         def hypervisors
-          hypervisors_lnk = self.links.select {|l| l['rel'] == "hypervisors" }.first
-          hyps = service.get_admin_datacenters_x_hypervisors(self.id)["collection"]
+          requires :id, :url
+          type = self.url['type']
+          
+          if type.include? "datacenter"
+            hyps = service.get_admin_datacenters_x_hypervisors(self.id)
+            ([].push hyps.map {|h| h['name'] }).flatten!
+          elsif type.include? "publiccloudregion"
+            hyptype_href = self.links.select {|l| l['rel'].eql? "hypervisortype" }.first['href']
+            [].push hyptype_href.split('/').last
+          end
+        end
 
-          ([].push hyps.map {|h| h['name'] }).flatten!
+        def hardwareprofiles
+          requires :id, :url
+
+          return nil if self.url['type'].include? "datacenter"
+
+          Fog::Compute::Abiquo::HardwareProfiles.new :location_id => self.id, 
+                                                     :service => service
         end
 
         def delete

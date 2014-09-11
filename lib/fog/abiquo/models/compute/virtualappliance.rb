@@ -1,7 +1,7 @@
 module Fog
   module Compute
     class Abiquo
-      class Virtualapp < Fog::Compute::Abiquo::LinkModel
+      class VirtualAppliance < Fog::Compute::Abiquo::LinkModel
         identity  :id
 
         attribute :error
