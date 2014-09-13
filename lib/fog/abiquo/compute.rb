@@ -7,8 +7,12 @@ module Fog
   module Compute
     class Abiquo < Fog::Service
       include LinkModel
-      # class BadRequest < Fog::Compute::Cloudstack::Error; end
-      # class Unauthorized < Fog::Compute::Cloudstack::Error; end
+      
+      class Fog::Compute::Abiquo::Error; end
+      class Fog::Compute::Abiquo::InvalidCredentials < Fog::Compute::Abiquo::Error; end
+      class Fog::Compute::Abiquo::Forbidden < Fog::Compute::Abiquo::Error; end
+      class Fog::Compute::Abiquo::BadRequest < Fog::Compute::Abiquo::Error; end
+      class Fog::Compute::Abiquo::UnsupportedMediaType < Fog::Compute::Abiquo::Error; end
 
       requires :abiquo_api_url, :abiquo_username, :abiquo_password
       attr_reader :enterprise
@@ -599,20 +603,25 @@ module Fog
             else
               resp
             end
-
           rescue Excon::Errors::HTTPStatusError => error
-            error_response = Fog::JSON.decode(error.response.body)
-
-            error_code = error_response.values.first['errorcode']
-            error_text = error_response.values.first['errortext']
-
-            case error_code
+            case error.response.status
             when 401
-              raise Fog::Compute::Abiquo::Unauthorized, error_text
-            when 431
-              raise Fog::Compute::Cloudstack::BadRequest, error_text
+              raise Fog::Compute::Abiquo::InvalidCredentials, "Wrong username or password"
+            when 403
+              raise Fog::Compute::Abiquo::Forbidden, "Not Authorized"
+            when 406
+              raise Fog::Compute::Abiquo::BadRequest, "Bad request"
+            when 415
+              raise Fog::Compute::Abiquo::UnsupportedMediaType, "Unsupported mediatype"
+            when 409
+              error_response = Fog::JSON.decode(error.response.body)
+
+              error_code = error_response['collection']['code']
+              error_text = error_response['collection']['message']
+
+              raise Fog::Compute::Abiquo::Error, "#{error_code} - #{error_text}"
             else
-              raise Fog::Compute::Cloudstack::Error, error_text
+              raise Fog::Compute::Abiquo::Error, error.response.body
             end
           end
         end
@@ -628,103 +637,6 @@ module Fog
         def config_properties
           @config_properties || {}
         end
-        
-        # def login(username,password)
-        #   response = issue_request({
-        #     'response' => 'json',
-        #     'command'  => 'login',
-        #     'username' => username,
-        #     'password' => Digest::MD5.hexdigest(password),
-        #     'domain'   => domain
-        #   })
-
-        #   # Parse response cookies to retrive JSESSIONID token
-        #   cookies   = CGI::Cookie.parse(response.headers['Set-Cookie'])
-        #   sessionid = cookies['JSESSIONID'].first
-
-        #   # Decode the login response
-        #   response   = Fog::JSON.decode(response.body)
-
-        #   user = response['loginresponse']
-        #   user.merge!('sessionid' => sessionid)
-
-        #   @cloudstack_session_id  = user['sessionid']
-        #   @cloudstack_session_key = user['sessionkey']
-
-        #   user
-        # end
-
-      #   def request(params)
-      #     params.reject!{|k,v| v.nil?}
-
-      #     params.merge!('response' => 'json')
-
-      #     if has_session?
-      #       params, headers = authorize_session(params)
-      #     elsif has_keys?
-      #       params, headers = authorize_api_keys(params)
-      #     end
-
-      #     response = issue_request(params,headers)
-      #     response = Fog::JSON.decode(response.body) unless response.body.empty?
-      #     response
-      #   end
-
-      #   private
-      #   def has_session?
-      #     @cloudstack_session_id && @cloudstack_session_key
-      #   end
-
-      #   def has_keys?
-      #     @cloudstack_api_key && @cloudstack_secret_access_key
-      #   end
-
-      #   def authorize_session(params)
-      #     # set the session id cookie for the request
-      #     headers = {'Cookie' => "JSESSIONID=#{@cloudstack_session_id};"}
-      #     # set the sesion key for the request, params are not signed using session auth
-      #     params.merge!('sessionkey' => @cloudstack_session_key)
-
-      #     return params, headers
-      #   end
-
-      #   def authorize_api_keys(params)
-      #     headers = {}
-      #     # merge the api key into the params
-      #     params.merge!('apiKey' => @cloudstack_api_key)
-      #     # sign the request parameters
-      #     signature = Fog::Cloudstack.signed_params(@cloudstack_secret_access_key,params)
-      #     # merge signature into request param
-      #     params.merge!({'signature' => signature})
-
-      #     return params, headers
-      #   end
-
-      #   def issue_request(params={},headers={},method='GET',expects=200)
-      #     begin
-      #       @connection.request({
-      #         :query => params,
-      #         :headers => headers,
-      #         :method => method,
-      #         :expects => expects
-      #       })
-
-      #     rescue Excon::Errors::HTTPStatusError => error
-      #       error_response = Fog::JSON.decode(error.response.body)
-
-      #       error_code = error_response.values.first['errorcode']
-      #       error_text = error_response.values.first['errortext']
-
-      #       case error_code
-      #       when 401
-      #         raise Fog::Compute::Cloudstack::Unauthorized, error_text
-      #       when 431
-      #         raise Fog::Compute::Cloudstack::BadRequest, error_text
-      #       else
-      #         raise Fog::Compute::Cloudstack::Error, error_text
-      #       end
-      #     end
-      #   end
       end # Real
 
       class Mock

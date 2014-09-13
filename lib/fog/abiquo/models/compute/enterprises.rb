@@ -8,7 +8,7 @@ module Fog
         model Fog::Compute::Abiquo::Enterprise
 
         def all(options = {})
-          response = service.get_admin_enterprises
+          response = service.get_admin_enterprises || []
           load(response)
         end
 
