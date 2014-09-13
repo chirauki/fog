@@ -7,7 +7,7 @@ module Fog
             :expects  => [200],
             :method   => 'GET',
             :path     => "/admin/enterprises",
-            :accept   => "application/vnd.abiquo.enterprises-id-name+json",
+            :accept   => "application/vnd.abiquo.enterprises+json",
             :query    => options
           )
         end

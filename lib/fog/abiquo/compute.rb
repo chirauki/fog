@@ -82,6 +82,11 @@ module Fog
       collection :virtualmachines
       model :task
       collection :tasks
+      model :enterprise
+      collection :enterprises
+      collection :enterprisevirtualmachines
+      model :publiccloudcredential
+      collection :publiccloudcredentials
 
       model :datacenter
       collection :datacenters
