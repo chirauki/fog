@@ -67,6 +67,12 @@ module Fog
           service.delete_cloud_virtualdatacenters_x(self.id)
         end
 
+        def location
+          requires :location_id
+          response = service.get_cloud_locations_x(self.location_id)
+          Fog::Compute::Abiquo::Location.new(response.merge({:service => service}))
+        end
+
         def virtualappliances
           requires :id
           @virtualapps ||= Fog::Compute::Abiquo::VirtualAppliances.new :vdc_id => self.id, :service => service
