@@ -1,27 +1,17 @@
 module Fog
   module Compute
     class Abiquo
-      class Datacenter < Fog::Compute::Abiquo::LinkModel
+      class PublicCloudRegion < Fog::Compute::Abiquo::LinkModel
         identity  :id
 
-        attribute :location
         attribute :name
         attribute :uuid
 
-        attribute :racks_lnk
-        attribute :remoteservices_lnk
-        attribute :backups_lnk
-        attribute :updateusedresources_lnk
-        attribute :hypervisors_lnk
+        attribute :url
         attribute :enterprises_lnk
-        attribute :discover_lnk
-        attribute :checkmachinestate_lnk
-        attribute :checkmachineipmistate_lnk
-        attribute :tiers_lnk
-        attribute :devices_lnk
-        attribute :networkservicetypes_lnk
-        attribute :network_lnk
-        attribute :getLimits_lnk
+        attribute :remoteservices_lnk
+        attribute :hypervisortype_lnk
+        attribute :region_lnk
 
         def save
           requires :name
@@ -38,7 +28,13 @@ module Fog
           requires :id
           service.delete_admin_enterprises_x(self.id)
         end
-      end # Datacenter
+
+        def enterprises
+          requires :id
+          response = service.get_admin_publiccloudregions_x_enterprises(self.id)
+          Fog::Compute::Abiquo::Enterprises.new response.merge({:service => service})
+        end
+      end # PublicCloudRegion
     end # Abiquo
   end  # Compute
 end # Fog

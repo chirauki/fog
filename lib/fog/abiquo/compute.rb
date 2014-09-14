@@ -46,6 +46,8 @@ module Fog
       collection :racks
       model :remoteservice
       collection :remoteservices
+      model :publiccloudregion
+      collection :public_cloud_regions
 
       request_path 'fog/abiquo/requests/compute'
       request :delete_admin_datacenters_x
