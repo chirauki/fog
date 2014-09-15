@@ -21,6 +21,7 @@ module Fog
         attribute :keymap
         attribute :label
 
+        attribute :url
         attribute :enterprise_lnk
         attribute :enterprise_id
         attribute :user_lnk
