@@ -521,7 +521,6 @@ module Fog
       request :put_config_properties
       request :put_config_properties_x
 
-
       class Real
         def initialize(options={})
           @abiquo_username = options[:abiquo_username]
@@ -536,7 +535,7 @@ module Fog
             :method   => 'GET',
             :path     => '/login',
             :accept   => 'application/vnd.abiquo.user+json'
-          )
+            )
           @enterprise = loginresp['links'].select {|l| l['rel'] == 'enterprise'}.first
           @user = loginresp
 
@@ -545,7 +544,7 @@ module Fog
             :method   => 'GET',
             :path     => '/config/properties',
             :accept   => 'application/vnd.abiquo.systemproperties+json'
-          )
+            )
           @config_properties = propsreq
         end
 
@@ -623,7 +622,16 @@ module Fog
 
               raise Fog::Compute::Abiquo::Error, "#{error_code} - #{error_text}"
             else
-              raise Fog::Compute::Abiquo::Error, "#{error.response.status} - #{error.response.body}"
+              if Fog::JSON.decode(error.response.body)
+                error_response = Fog::JSON.decode(error.response.body)
+
+                error_code = error_response['collection']['code']
+                error_text = error_response['collection']['message']
+
+                raise Fog::Compute::Abiquo::Error, "#{error_code} - #{error_text}"
+              else
+                raise Fog::Compute::Abiquo::Error, error.response.body
+              end
             end
           end
         end
