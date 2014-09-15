@@ -250,6 +250,7 @@ module Fog
       request :get_cloud_locations
       request :get_cloud_locations_pcr
       request :get_cloud_locations_x
+      request :get_cloud_locations_pcr_x
       request :get_cloud_locations_x_availabilityzones
       request :get_cloud_locations_x_availabilityzones_x
       request :get_cloud_locations_x_firewalls
@@ -614,19 +615,12 @@ module Fog
               raise Fog::Compute::Abiquo::BadRequest, "Bad request"
             when 415
               raise Fog::Compute::Abiquo::UnsupportedMediaType, "Unsupported mediatype"
-            when 409
-              error_response = Fog::JSON.decode(error.response.body)
-
-              error_code = error_response['collection']['code']
-              error_text = error_response['collection']['message']
-
-              raise Fog::Compute::Abiquo::Error, "#{error_code} - #{error_text}"
             else
               begin
                 error_response = Fog::JSON.decode(error.response.body)
 
-                error_code = error_response['collection']['code']
-                error_text = error_response['collection']['message']
+                error_code = error_response['collection'][0]['code']
+                error_text = error_response['collection'][0]['message']
 
                 raise Fog::Compute::Abiquo::Error, "#{error_code} - #{error_text}"
               rescue

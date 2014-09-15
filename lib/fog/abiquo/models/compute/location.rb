@@ -4,12 +4,27 @@ module Fog
       class Location < Fog::Compute::Abiquo::LinkModel
         identity  :id
 
-        attribute :location
         attribute :name
         attribute :uuid
 
         attribute :url
-        attribute :links
+        attribute :enterprises_lnk
+        attribute :remoteservices_lnk
+        attribute :hypervisortype_lnk
+        attribute :region_lnk
+        attribute :racks_lnk
+        attribute :remoteservices_lnk
+        attribute :backups_lnk
+        attribute :updateusedresources_lnk
+        attribute :hypervisors_lnk
+        attribute :discover_lnk
+        attribute :checkmachinestate_lnk
+        attribute :checkmachineipmistate_lnk
+        attribute :tiers_lnk
+        attribute :devices_lnk
+        attribute :networkservicetypes_lnk
+        attribute :network_lnk
+        attribute :getLimits_lnk
 
         def hypervisors
           requires :id, :url

@@ -16,10 +16,30 @@ module Fog
           load(locations)
         end
 
-        def get(dc_id)
-          response = service.get_admin_datacenters_x(dc_id)
-          datacenter_data = response
-          new(datacenter_data)
+        def get(id)
+          response = nil
+          begin
+            response = service.get_cloud_locations_x(id)
+          rescue Fog::Compute::Abiquo::Error
+            response = service.get_cloud_locations_pcr_x(id)
+          end
+          new(response)
+        end
+
+        def where(args={})
+          items = []
+          response = service.get_cloud_locations
+          items += response
+          response = service.get_cloud_locations_pcr
+          items += response
+          result_items = []
+
+          return load(items) if args.empty?
+          
+          args.keys.each do |arg|
+            result_items += items.select {|i| i[arg.to_s] == args[arg]}
+          end
+          load(result_items)
         end
       end
     end

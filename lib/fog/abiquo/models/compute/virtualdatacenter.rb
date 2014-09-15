@@ -69,8 +69,7 @@ module Fog
 
         def location
           requires :location_id
-          response = service.get_cloud_locations_x(self.location_id)
-          Fog::Compute::Abiquo::Location.new(response.merge({:service => service}))
+          service.locations.get(self.location_id)
         end
 
         def virtualappliances
