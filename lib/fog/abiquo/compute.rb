@@ -622,14 +622,14 @@ module Fog
 
               raise Fog::Compute::Abiquo::Error, "#{error_code} - #{error_text}"
             else
-              if Fog::JSON.decode(error.response.body)
+              begin
                 error_response = Fog::JSON.decode(error.response.body)
 
                 error_code = error_response['collection']['code']
                 error_text = error_response['collection']['message']
 
                 raise Fog::Compute::Abiquo::Error, "#{error_code} - #{error_text}"
-              else
+              rescue
                 raise Fog::Compute::Abiquo::Error, error.response.body
               end
             end
