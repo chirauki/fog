@@ -20,6 +20,8 @@ module Fog
         attribute :diskFileSize
         attribute :diskFormatType
         attribute :hdRequired
+        attribute :loginUser
+        attribute :iconUrl
 
         attribute :url
         attribute :enterprise_lnk
@@ -35,6 +37,7 @@ module Fog
         attribute :master_id
         attribute :template_lnk
         attribute :diskfile_lnk
+        attribute :instances_lnk
         attribute :templatedefinition_lnk
 
         def reload

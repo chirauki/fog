@@ -623,7 +623,7 @@ module Fog
 
               raise Fog::Compute::Abiquo::Error, "#{error_code} - #{error_text}"
             else
-              raise Fog::Compute::Abiquo::Error, error.response.body
+              raise Fog::Compute::Abiquo::Error, "#{error.response.status} - #{error.response.body}"
             end
           end
         end
