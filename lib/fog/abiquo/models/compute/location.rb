@@ -34,7 +34,7 @@ module Fog
             hyps = service.get_admin_datacenters_x_hypervisors(self.id)
             ([].push hyps.map {|h| h['name'] }).flatten!
           elsif type.include? "publiccloudregion"
-            hyptype_href = self.links.select {|l| l['rel'].eql? "hypervisortype" }.first['href']
+            hyptype_href = hypervisortype_lnk['href']
             [].push hyptype_href.split('/').last
           end
         end
