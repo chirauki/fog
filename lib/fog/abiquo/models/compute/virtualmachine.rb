@@ -93,6 +93,14 @@ module Fog
                                                 :service => service
         end
 
+        def volumes
+          requires :id, :virtualappliance_id, :virtualdatacenter_id
+          Fog::Compute::Abiquo::Volumes.new :vdc_id => self.virtualdatacenter_id, 
+                                            :vapp_id => self.virtualappliance_id,
+                                            :vm_id => self.id,
+                                            :service => service
+        end
+
         def deploy
           requires :id, :virtualappliance_id, :virtualdatacenter_id
           response = service.post_cloud_virtualdatacenters_x_virtualappliances_x_virtualmachines_x_action_deploy(self.virtualdatacenter_id,

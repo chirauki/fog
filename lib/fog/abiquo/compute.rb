@@ -33,6 +33,8 @@ module Fog
       collection :virtualappliances
       model :virtualmachine
       collection :virtualmachines
+      model :volume
+      collection :volumes
       model :nic
       collection :nics
       model :task
