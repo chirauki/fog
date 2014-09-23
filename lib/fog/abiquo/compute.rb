@@ -1,12 +1,13 @@
 require 'fog/abiquo/core'
 require 'fog/abiquo/common/linkmodel'
+require 'fog/abiquo/common/linkserver'
 require 'digest/md5'
 require 'uri'
 
 module Fog
   module Compute
     class Abiquo < Fog::Service
-      include LinkModel
+      include Links
       
       class Fog::Compute::Abiquo::Error; end
       class Fog::Compute::Abiquo::InvalidCredentials < Fog::Compute::Abiquo::Error; end
@@ -32,6 +33,8 @@ module Fog
       collection :virtualappliances
       model :virtualmachine
       collection :virtualmachines
+      model :nic
+      collection :nics
       model :task
       collection :tasks
       model :enterprise

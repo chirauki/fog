@@ -1,7 +1,7 @@
 module Fog
   module Compute
     class Abiquo
-      class Virtualmachine < Fog::Compute::Abiquo::LinkModel
+      class Virtualmachine < Fog::Compute::Abiquo::LinkServer
         identity  :id
 
         attribute :monitored
@@ -20,6 +20,9 @@ module Fog
         attribute :idType
         attribute :keymap
         attribute :label
+
+        attribute :public_ip_address
+        attribute :private_ip_address
 
         attribute :url
         attribute :enterprise_lnk
@@ -109,11 +112,58 @@ module Fog
           task_lnk.split('/').last
         end
 
+        def nics
+          requires :id, :virtualdatacenter_id, :virtualappliance_id
+          Fog::Compute::Abiquo::Nics.new :service => service,
+                                         :vdc_id  => self.virtualdatacenter_id,
+                                         :vapp_id => self.virtualappliance_id,
+                                         :vm_id   => self.id
+        end
+
+        def public_ip_address
+          requires :id, :virtualdatacenter_id, :virtualappliance_id
+          
+          nics = self.nics
+          if nics.select {|n| self.is_public_ip? n.ip }.first.nil?
+            nil
+          else
+            nics.select {|n| self.is_public_ip? n.ip }.first.ip
+          end
+        end
+
+        def private_ip_address
+          requires :id, :virtualdatacenter_id, :virtualappliance_id
+          
+          nics = self.nics
+          if nics.select {|n| not self.is_public_ip? n.ip }.first.nil?
+            nil
+          else
+            nics.select {|n| not self.is_public_ip? n.ip }.first.ip
+          end
+        end
+
         def delete
           requires :id, :virtualappliance_id, :virtualdatacenter_id
           service.delete_cloud_virtualdatacenters_x_virtualappliances_x_virtualmachines_x(self.virtualdatacenter_id,
                                                                                       self.virtualappliance_id,
                                                                                       self.id)
+        end
+
+        def ready?
+          self.state == 'ON'
+        end
+
+        def is_public_ip?(ip)
+          publicip = false
+          bytes = ip.split(".")
+          if bytes[0].to_i != 10 and bytes[0].to_i != 172 and bytes[0].to_i != 192
+            publicip = true
+          elsif bytes[0].to_i == 172 and not bytes[1].to_i.between?(16, 31)
+            publicip = true
+          elsif bytes[0].to_i == 192 and not bytes[1].to_i == 168
+            publicip = true
+          end
+          publicip
         end
       end # Class VirtualMachine
     end # Class Abiquo

@@ -1,5 +1,7 @@
+require 'fog/compute/models/server'
+
 module Links
-  class LinkModel < Fog::Model
+  class LinkServer < Fog::Compute::Server
     def initialize(attributes={})
       if not attributes['links'].nil?
         attributes['links'].each do |link|
