@@ -7,7 +7,7 @@ module Fog
             :expects  => [200],
             :method   => 'GET',
             :path     => "/events",
-            :accept   => "application/vnd.abiquo.eventtypes+json",
+            :accept   => "application/vnd.abiquo.events+json",
             :query    => options
           )
         end

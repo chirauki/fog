@@ -44,7 +44,8 @@ module Fog
       collection :enterprisevirtualmachines
       model :publiccloudcredential
       collection :publiccloudcredentials
-
+      model :event
+      collection :events
       model :datacenter
       collection :datacenters
       model :rack

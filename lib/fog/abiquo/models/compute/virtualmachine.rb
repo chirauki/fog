@@ -122,10 +122,11 @@ module Fog
 
         def nics
           requires :id, :virtualdatacenter_id, :virtualappliance_id
-          Fog::Compute::Abiquo::Nics.new :service => service,
-                                         :vdc_id  => self.virtualdatacenter_id,
-                                         :vapp_id => self.virtualappliance_id,
-                                         :vm_id   => self.id
+
+          service.nics(:vdc_id  => self.virtualdatacenter_id,
+                       :vapp_id => self.virtualappliance_id,
+                       :vm_id   => self.id,
+                       :service => service)
         end
 
         def public_ip_address
@@ -148,6 +149,11 @@ module Fog
           else
             nics.select {|n| not self.is_public_ip? n.ip }.first.ip
           end
+        end
+
+        def events
+          requires :name
+          service.events.all(:virtualMachine => self.name)
         end
 
         def delete
