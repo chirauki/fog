@@ -4,7 +4,7 @@ module Fog
       class Real
         def get_admin_datacenters_x_remoteservices_x_action_check(datacenter, remoteservice, options = {})
           request(
-            :expects  => [200],
+            :expects  => [204],
             :method   => 'GET',
             :path     => "/admin/datacenters/#{datacenter}/remoteservices/#{remoteservice}/action/check",
             :accept   => "*/*",

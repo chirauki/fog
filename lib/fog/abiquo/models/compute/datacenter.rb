@@ -24,19 +24,24 @@ module Fog
         attribute :getLimits_lnk
 
         def save
-          requires :name
+          requires :name, :location
           if self.id
-            resp = service.put_admin_enterprises_x(self.id,
+            resp = service.put_admin_datacenters_x(self.id,
                                                    self.to_json)
           else
-            resp = service.post_admin_enterprises(self.to_json)
+            resp = service.post_admin_datacenters(self.to_json)
           end
           merge_attributes(resp)
         end
 
-        def delete
+        def destroy
           requires :id
-          service.delete_admin_enterprises_x(self.id)
+          service.delete_admin_datacenters_x(self.id)
+        end
+
+        def remoteservices
+          Fog::Compute::Abiquo::RemoteServices.new :service => service,
+                                                   :dc_id => self.id
         end
       end # Datacenter
     end # Abiquo

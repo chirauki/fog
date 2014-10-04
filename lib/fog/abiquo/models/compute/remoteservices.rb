@@ -8,25 +8,38 @@ module Fog
       class RemoteServices < Fog::Collection
         model Fog::Compute::Abiquo::RemoteService
 
-        def all(options = {})
-          @dc_lnk ||= attributes[:dc_lnk]
-          response = service.list_remoteservices(@dc_lnk)
-          remoteservices_data = response["collection"] || []
-          load(remoteservices_data)
+        def all(args = {})
+          dc_id ||= attributes[:dc_id]
+          response = service.get_admin_datacenters_x_remoteservices(dc_id)
+          load(response)
         end
 
         def get(rs_type)
-          @dc_lnk ||= attributes[:dc_lnk]
-          response = service.get_remoteservice(:dc_lnk => @dc_lnk, :rs_type => rs_type)
-          remoteservice_data = response
-          new(remoteservice_data)
+          dc_id ||= attributes[:dc_id]
+          response = service.get_admin_datacenters_x_remoteservices_x(dc_id, rs_type)
+          new(response)
         end
 
-        def create(options = {})
-          @dc_lnk ||= attributes[:dc_lnk]
-          resp = service.create_remoteservice(@dc_lnk, options.to_json)
-          remoteservice_data = resp
-          new(remoteservice_data)
+        def where(args = {})
+          dc_id ||= attributes[:dc_id]
+          items = service.get_admin_datacenters_x_remoteservices(dc_id)
+          result_items = []
+
+          return load(items) if args.empty?
+          
+          args.keys.each do |arg|
+            result_items += items.select {|i| i[arg.to_s] == args[arg]}
+          end
+          load(result_items)
+        end
+
+        def create(args = {})
+          dc_id ||= attributes[:dc_id]
+
+          object = new(args)
+          object.datacenter_id = dc_id
+          object.save
+          object
         end
       end
     end

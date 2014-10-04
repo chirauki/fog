@@ -88,9 +88,9 @@ module Fog
         def tasks
           requires :id, :virtualappliance_id, :virtualdatacenter_id
           Fog::Compute::Abiquo::Tasks.new :vdc_id => self.virtualdatacenter_id, 
-                                                :vapp_id => self.virtualappliance_id,
-                                                :vm_id => self.id,
-                                                :service => service
+                                          :vapp_id => self.virtualappliance_id,
+                                          :vm_id => self.id,
+                                          :service => service
         end
 
         def volumes
@@ -123,10 +123,10 @@ module Fog
         def nics
           requires :id, :virtualdatacenter_id, :virtualappliance_id
 
-          service.nics(:vdc_id  => self.virtualdatacenter_id,
-                       :vapp_id => self.virtualappliance_id,
-                       :vm_id   => self.id,
-                       :service => service)
+          Fog::Compute::Abiquo::Nics.new :vdc_id  => self.virtualdatacenter_id,
+                                         :vapp_id => self.virtualappliance_id,
+                                         :vm_id   => self.id,
+                                         :service => service
         end
 
         def public_ip_address
@@ -153,7 +153,7 @@ module Fog
 
         def events
           requires :name
-          service.events.all(:virtualMachine => self.name)
+          Fog::Compute::Abiquo::Events.new(:service => service).all(:virtualMachine => self.name)
         end
 
         def delete
