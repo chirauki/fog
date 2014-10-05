@@ -50,6 +50,10 @@ module Fog
       collection :datacenters
       model :rack
       collection :racks
+      model :machine
+      collection :machines
+      model :datastore
+      collection :datastores
       model :remoteservice
       collection :remoteservices
       model :publiccloudregion

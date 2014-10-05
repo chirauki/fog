@@ -21,6 +21,9 @@ module Fog
         end
 
         def machines
+          Fog::Compute::Abiquo::Machines.new :service => service,
+                                             :dc_id => self.datacenter_id,
+                                             :rack_id => self.id
         end
 
         def save
