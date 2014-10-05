@@ -23,6 +23,51 @@ module Fog
         attribute :network_lnk
         attribute :getLimits_lnk
 
+        def racks
+          Fog::Compute::Abiquo::Racks.new :service => service, :dc_id => self.id
+        end
+
+        def backups
+        end
+
+        def updateusedresources
+        end
+
+        def hypervisors
+        end
+
+        def enterprises
+        end
+
+        def discover
+        end
+
+        def checkmachinestate
+        end
+
+        def checkmachineipmistate
+        end
+
+        def tiers
+        end
+
+        def devices
+        end
+
+        def networkservicetypes
+        end
+
+        def network
+        end
+
+        def getLimits
+        end
+        
+        def remoteservices
+          Fog::Compute::Abiquo::RemoteServices.new :service => service,
+                                                   :dc_id => self.id
+        end
+
         def save
           requires :name, :location
           if self.id
@@ -39,10 +84,6 @@ module Fog
           service.delete_admin_datacenters_x(self.id)
         end
 
-        def remoteservices
-          Fog::Compute::Abiquo::RemoteServices.new :service => service,
-                                                   :dc_id => self.id
-        end
       end # Datacenter
     end # Abiquo
   end  # Compute

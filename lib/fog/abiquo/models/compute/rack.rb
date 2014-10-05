@@ -1,28 +1,44 @@
 module Fog
   module Compute
     class Abiquo
-      class Rack < Fog::Model
+      class Rack < Fog::Compute::Abiquo::LinkModel
         identity  :id
 
         attribute :haEnabled
         attribute :name
-        attribute :nsrq
+        attribute :nrsq
         attribute :vlanIdMax
         attribute :vlanIdMin
         attribute :vlanPerVdcReserved
         
-        attribute :links
+        attribute :url
+        attribute :machines_lnk
+        attribute :datacenter_lnk
+        attribute :datacenter_id
 
-        def reload
-          requires :id
-          mylnk = self.links.select {|l| l['rel'] == 'datacenter'}.first['href']
-          service.get_rack(mylnk, self.id)
+        def datacenter
+          Fog::Compute::Abiquo::Datacenters.new(:service => service).get(datacenter_id)
         end
 
-        def delete
-          requires :id
-          mylnk = self.links.select {|l| l['rel'] == 'edit'}.first['href']
-          service.delete_entity(mylnk)
+        def machines
+        end
+
+        def save
+          requires :name, :datacenter_id
+          if self.id
+            resp = service.put_admin_datacenters_x_racks_x(self.datacenter_id,
+                                                           self.id,
+                                                           self.to_json)
+          else
+            resp = service.post_admin_datacenters_x_racks(self.datacenter_id,
+                                                          self.to_json)
+          end
+          merge_attributes(resp)
+        end
+
+        def destroy
+          requires :id, :datacenter_id
+          service.delete_admin_datacenters_x_racks_x(self.datacenter_id, self.id)
         end
       end # Class vApp
     end # Class Abiquo
