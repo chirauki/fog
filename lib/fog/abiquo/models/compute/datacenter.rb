@@ -31,6 +31,9 @@ module Fog
         end
 
         def updateusedresources
+          requires :id
+          service.put_admin_datacenters_x_action_updateusedresources(self.id)
+          reload
         end
 
         def hypervisors

@@ -52,6 +52,7 @@ module Fog
       collection :racks
       model :machine
       collection :machines
+      model :networkinterface
       model :datastore
       collection :datastores
       model :remoteservice
@@ -625,17 +626,17 @@ module Fog
               raise Fog::Compute::Abiquo::BadRequest, "Bad request"
             when 415
               raise Fog::Compute::Abiquo::UnsupportedMediaType, "Unsupported mediatype"
-            when 409
+            when 409, 400
               begin
                 error_response = Fog::JSON.decode(error.response.body)
 
                 error_code = error_response['collection'][0]['code']
                 error_text = error_response['collection'][0]['message']
 
-                raise Fog::Compute::Abiquo::Error, "#{error_code} - #{error_text}"
               rescue
                 raise Fog::Compute::Abiquo::Error, error.response.body
               end
+              raise Fog::Compute::Abiquo::Error, "#{error_code} - #{error_text}"
             else
               raise Fog::Compute::Abiquo::Error, error.response.body              
             end

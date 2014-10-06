@@ -4,7 +4,7 @@ module Fog
       class Real
         def put_admin_datacenters_x_action_updateusedresources(datacenter, payload, options = {})
           request(
-            :expects  => [200, 201],
+            :expects  => [204],
             :method   => 'PUT',
             :path     => "/admin/datacenters/#{datacenter}/action/updateusedresources",
             :accept   => "*/*",

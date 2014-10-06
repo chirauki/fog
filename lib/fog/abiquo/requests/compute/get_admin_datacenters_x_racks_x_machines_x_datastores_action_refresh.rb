@@ -4,9 +4,9 @@ module Fog
       class Real
         def get_admin_datacenters_x_racks_x_machines_x_datastores_action_refresh(datacenter, rack, machine, options = {})
           request(
-            :expects  => [200],
+            :expects  => [204],
             :method   => 'GET',
-            :path     => "/admin/datacenters/#{datacenter}/racks/#{rack}/machines/#{machine}/datastores//action/refresh",
+            :path     => "/admin/datacenters/#{datacenter}/racks/#{rack}/machines/#{machine}/datastores/action/refresh",
             :accept   => "*/*",
             :query    => options
           )
