@@ -23,6 +23,12 @@ module Fog
         attribute :network_lnk
         attribute :getLimits_lnk
 
+        def hypervisors
+          requires :id, :url
+          hyps = service.get_admin_datacenters_x_hypervisors(self.id)
+          ([].push hyps.map {|h| h['name'] }).flatten!
+        end
+
         def racks
           Fog::Compute::Abiquo::Racks.new :service => service, :dc_id => self.id
         end

@@ -1,7 +1,7 @@
 module Fog
   module Compute
     class Abiquo
-      class PublicCloudRegion < Fog::Compute::Abiquo::LinkModel
+      class Publiccloudregion < Fog::Compute::Abiquo::LinkModel
         identity  :id
 
         attribute :name
@@ -27,6 +27,12 @@ module Fog
         def delete
           requires :id
           service.delete_admin_enterprises_x(self.id)
+        end
+
+        def hypervisors
+          requires :id, :url
+          hyptype_href = hypervisortype_lnk['href']
+          [].push hyptype_href.split('/').last
         end
 
         def enterprises

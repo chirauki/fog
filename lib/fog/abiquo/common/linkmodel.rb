@@ -10,7 +10,7 @@ module Links
           attributes[rel] = link
 
           idrel = "#{link['rel'].gsub(/\//, '_')}_id"
-          attributes[idrel] = link['href'].split('/').last
+          attributes[idrel] = link['href'].split('/').last.to_i
         end
       end
       object = super

@@ -32,15 +32,6 @@ module Fog
           end
           load(result_items)
         end
-
-        # def create(name)
-        #   vdc_id ||= attributes[:vdc_id]
-        #   object = new
-        #   object.virtualdatacenter_id = vdc_id
-        #   object.name = name
-        #   object.save
-        #   object
-        # end
       end
     end
   end

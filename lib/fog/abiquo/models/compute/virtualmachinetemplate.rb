@@ -40,26 +40,22 @@ module Fog
         attribute :instances_lnk
         attribute :templatedefinition_lnk
 
-        def reload
-          requires :id
-          response = service.get_cloud_virtualdatacenters_x(self.id)
-          merge_attributes(response)
+        def virtualmachines
+          requires :id, :datacenterrepository_id, :enterprise_id
+          resp = service.get_admin_enterprises_x_datacenterrepositories_x_virtualmachinetemplates_x_action_virtualmachines(
+                                                                                                    self.enterprise_id,
+                                                                                                    self.datacenterrepository_id,
+                                                                                                    self.id)
+          Fog::Compute::Abiquo::Virtualmachines.new(:service => service).load(resp)
         end
 
-        def save
-          requires :name, :hypervisorType, :enterprise_lnk, :location_lnk
-          if self.id
-            resp = service.put_cloud_virtualdatancenters_x(self.id,
-                                                          self.to_json)
-          else
-            resp = service.post_cloud_virtualdatacenters(self.to_json)
-          end
-          merge_attributes(resp)
-        end
-
-        def delete
-          requires :id
-          service.delete_cloud_virtualdatacenters_x(self.id)
+        def set_unavailable
+          requires :id, :datacenterrepository_id, :enterprise_id
+          service.post_admin_enterprises_x_datacenterrepositories_x_virtualmachinetemplates_x_action_deletefile(
+                                                              self.enterprise_id,
+                                                              self.datacenterrepository_id,
+                                                              self.id)
+          reload
         end
       end # Class VirtualMachineTemplate
     end # Class Abiquo

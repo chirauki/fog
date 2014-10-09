@@ -50,6 +50,16 @@ module Fog
           merge_attributes(resp)
         end
 
+        def datacenterrepositories
+          requires :id
+          Fog::Compute::Abiquo::DatacenterRepositories.new :service => service, :enterprise_id => self.id
+        end
+
+        def limits
+          requires :id
+          Fog::Compute::Abiquo::Limits.new :service => service, :enterprise_id => self.id
+        end
+
         def delete
           requires :id
           service.delete_admin_enterprises_x(self.id)

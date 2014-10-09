@@ -5,7 +5,7 @@ module Fog
         identity :id
 
         attribute :access
-        attribute :identity
+        attribute :key
         
         attribute :url
         attribute :enterprise_lnk
@@ -13,7 +13,7 @@ module Fog
         attribute :hypervisortype_lnk
 
         def save
-          requires :access, :identity
+          requires :access, :key
           if self.id
             resp = service.put_admin_enterprises_x_credentials_x(self.enterprise_id,
                                                     self.id,
@@ -23,19 +23,8 @@ module Fog
                                                     self.to_json)
           end
           merge_attributes(resp)
+          reload
         end
-
-        def delete
-          requires :id
-          service.delete_admin_enterprises_x(self.id)
-        end
-        
-        def reload
-          requires :id
-          response = service.get_admin_enterprises_x_credentials_x(self.enterprise_id,
-                                                                   self.id)
-          merge_attributes(response)
-        end 
       end # Class PublicCloudCredential
     end # Class Abiquo
   end # module Compute

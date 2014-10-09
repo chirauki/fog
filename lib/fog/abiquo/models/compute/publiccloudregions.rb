@@ -4,8 +4,8 @@ require 'fog/abiquo/models/compute/publiccloudregion'
 module Fog
   module Compute
     class Abiquo
-      class PublicCloudRegions < Fog::Collection
-        model Fog::Compute::Abiquo::PublicCloudRegion
+      class Publiccloudregions < Fog::Collection
+        model Fog::Compute::Abiquo::Publiccloudregion
 
         def all(options = {})
           response = service.get_admin_publiccloudregions

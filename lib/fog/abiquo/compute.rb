@@ -42,6 +42,11 @@ module Fog
       model :enterprise
       collection :enterprises
       collection :enterprisevirtualmachines
+      model :limit
+      collection :limits
+      model :datacenterrepository
+      collection :datacenterrepositories
+      collection :adminvirtualmachinetemplates
       model :publiccloudcredential
       collection :publiccloudcredentials
       model :event
@@ -58,7 +63,9 @@ module Fog
       model :remoteservice
       collection :remoteservices
       model :publiccloudregion
-      collection :public_cloud_regions
+      collection :publiccloudregions
+      model :hypervisortype
+      collection :hypervisortypes
 
       request_path 'fog/abiquo/requests/compute'
       request :delete_admin_datacenters_x
