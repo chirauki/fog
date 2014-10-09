@@ -15,6 +15,8 @@ module Fog
         attribute :tasks_lnk
         attribute :datacenter_lnk
         attribute :datacenter_id
+        attribute :publiccloudregion_lnk
+        attribute :publiccloudregion_id
         attribute :applianceManagerRepositoryUri_lnk
         attribute :applianceManagerRepositoryUri_id
 
