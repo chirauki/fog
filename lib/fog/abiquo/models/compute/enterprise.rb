@@ -50,6 +50,11 @@ module Fog
           merge_attributes(resp)
         end
 
+        def users
+          requires :id
+          Fog::Compute::Abiquo::Users.new :service => service, :enterprise_id => self.id
+        end
+
         def datacenterrepositories
           requires :id
           Fog::Compute::Abiquo::DatacenterRepositories.new :service => service, :enterprise_id => self.id

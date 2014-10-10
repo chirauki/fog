@@ -42,6 +42,10 @@ module Fog
       model :enterprise
       collection :enterprises
       collection :enterprisevirtualmachines
+      model :user
+      collection :users
+      model :role
+      collection :roles
       model :limit
       collection :limits
       model :datacenterrepository
