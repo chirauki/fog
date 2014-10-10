@@ -57,6 +57,26 @@ module Fog
                                                               self.id)
           reload
         end
+
+        def import
+          requires :path
+          self.save
+        end
+
+        def save
+          requires :path, :name
+          if self.id
+            resp = service.put_admin_enterprises_x_datacenterrepositories_x_virtualmachinetemplates_x(self.enterprise_id,
+                                                              self.datacenterrepository_id,
+                                                              self.id,
+                                                              self.to_json)
+          else
+            resp = service.post_admin_enterprises_x_datacenterrepositories_x_virtualmachinetemplates(self.enterprise_id,
+                                                              self.datacenterrepository_id,
+                                                              self.to_json)
+          end
+          merge_attributes(resp) unless resp.empty?
+        end
       end # Class VirtualMachineTemplate
     end # Class Abiquo
   end # module Compute

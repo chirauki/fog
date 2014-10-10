@@ -7,8 +7,8 @@ module Fog
             :expects  => [200, 201],
             :method   => 'POST',
             :path     => "/admin/enterprises/#{enterprise}/datacenterrepositories/#{datacenterrepository}/virtualmachinetemplates",
-            :accept   => "application/vnd.abiquo.acceptedrequest+json",
-            :content  => "application/vnd.abiquo.templatedefinition+json",
+            :accept   => "application/vnd.abiquo.virtualmachinetemplate+json",
+            :content  => "application/vnd.abiquo.virtualmachinetemplate+json",
             :body     => payload,
             :query    => options
           )

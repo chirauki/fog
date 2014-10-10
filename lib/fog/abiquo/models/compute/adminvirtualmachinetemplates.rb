@@ -10,7 +10,8 @@ module Fog
         def all(options = {})
           @enterprise_id ||= attributes[:enterprise_id]
           @repo_id ||= attributes[:repo_id]
-          response = service.get_admin_enterprises_x_datacenterrepositories_x_virtualmachinetemplates(@enterprise_id, @repo_id)
+          response = service.get_admin_enterprises_x_datacenterrepositories_x_virtualmachinetemplates(@enterprise_id, @repo_id, options)
+          response.map {|r| r['datacenterrepository_id'] = attributes[:repo_id] } if options[:source] == "remote"
           load(response)
         end
 
@@ -22,10 +23,10 @@ module Fog
           new(response)
         end
 
-        def where(args={})
+        def where(args = {}, options = {})
           @enterprise_id ||= attributes[:enterprise_id]
           @repo_id ||= attributes[:repo_id]
-          items = service.get_admin_enterprises_x_datacenterrepositories_x_virtualmachinetemplates(@enterprise_id, @repo_id)
+          items = service.get_admin_enterprises_x_datacenterrepositories_x_virtualmachinetemplates(@enterprise_id, @repo_id, options)
           result_items = []
 
           return load(items) if args.empty?
@@ -34,6 +35,13 @@ module Fog
             result_items += items.select {|i| i[arg.to_s] == args[arg]}
           end
           load(result_items)
+        end
+
+        def destroy(id)
+          @enterprise_id ||= attributes[:enterprise_id]
+          @repo_id ||= attributes[:repo_id]
+          
+          service.delete_admin_enterprises_x_datacenterrepositories_x_virtualmachinetemplates_x(@enterprise_id, @repo_id, id)
         end
       end
     end

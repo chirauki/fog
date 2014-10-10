@@ -27,9 +27,9 @@ module Fog
 
         def virtualmachinetemplates
           requires :id, :enterprise_id
-          Fog::Compute::Abiquo::AdminVirtualMachineTemplates.new(:service => service,
+          Fog::Compute::Abiquo::AdminVirtualMachineTemplates.new :service => service,
                                                                  :enterprise_id => self.enterprise_id,
-                                                                 :repo_id => self.id)
+                                                                 :repo_id => self.id
         end
 
         def save

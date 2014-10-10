@@ -9,7 +9,7 @@ module Fog
 
         def all(options = {})
           @enterprise_id ||= attributes[:enterprise_id]
-          response = service.get_admin_enterprises_x_datacenterrepositories(@enterprise_id)
+          response = service.get_admin_enterprises_x_datacenterrepositories(@enterprise_id, options)
           load(response)
         end
 
@@ -26,9 +26,9 @@ module Fog
           object.destroy
         end
 
-        def where(args={})
+        def where(args={}, options={})
           @enterprise_id ||= attributes[:enterprise_id]
-          items = service.get_admin_enterprises_x_datacenterrepositories(@enterprise_id)
+          items = service.get_admin_enterprises_x_datacenterrepositories(@enterprise_id, options)
           result_items = []
 
           return load(items) if args.empty?

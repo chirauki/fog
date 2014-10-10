@@ -47,7 +47,7 @@ module Fog
             resp = service.post_admin_enterprises_x_limits(self.enterprise_id,
                                                           self.to_json)
           end
-          reload
+          merge_attributes(resp)
         end
 
         def destroy
