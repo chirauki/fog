@@ -40,12 +40,13 @@ module Fog
         attribute :instances_lnk
         attribute :templatedefinition_lnk
 
-        def virtualmachines
+        def virtualmachines(opts = {})
           requires :id, :datacenterrepository_id, :enterprise_id
           resp = service.get_admin_enterprises_x_datacenterrepositories_x_virtualmachinetemplates_x_action_virtualmachines(
                                                                                                     self.enterprise_id,
                                                                                                     self.datacenterrepository_id,
-                                                                                                    self.id)
+                                                                                                    self.id,
+                                                                                                    opts)
           Fog::Compute::Abiquo::Virtualmachines.new(:service => service).load(resp)
         end
 
