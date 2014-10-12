@@ -2,21 +2,19 @@ module Fog
   module Compute
     class Abiquo
       class Real
-        def post_admin_enterprises_x_datacenterrepositories_x_virtualmachinetemplates_x_action_deletefile(enterprise, datacenterrepository, virtualmachinetemplate, payload, options = {})
+        def post_admin_enterprises_x_datacenterrepositories_x_virtualmachinetemplates_x_action_deletefile(enterprise, datacenterrepository, virtualmachinetemplate)
           request(
-            :expects  => [200, 201],
+            :expects  => [204],
             :method   => 'POST',
             :path     => "/admin/enterprises/#{enterprise}/datacenterrepositories/#{datacenterrepository}/virtualmachinetemplates/#{virtualmachinetemplate}/action/deletefile",
             :accept   => "*/*",
-            :content  => "*/*",
-            :body     => payload,
-            :query    => options
+            :content  => "*/*"
           )
         end
       end
 
       class Mock
-        def post_admin_enterprises_x_datacenterrepositories_x_virtualmachinetemplates_x_action_deletefile(enterprise, datacenterrepository, virtualmachinetemplate, payload, options = {})
+        def post_admin_enterprises_x_datacenterrepositories_x_virtualmachinetemplates_x_action_deletefile(enterprise, datacenterrepository, virtualmachinetemplate)
           Fog::Mock.not_implemented
         end
       end
