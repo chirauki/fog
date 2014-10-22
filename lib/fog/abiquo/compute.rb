@@ -637,7 +637,7 @@ module Fog
               raise Fog::Compute::Abiquo::BadRequest, "Bad request"
             when 415
               raise Fog::Compute::Abiquo::UnsupportedMediaType, "Unsupported mediatype"
-            when 409, 400
+            else
               begin
                 error_response = Fog::JSON.decode(error.response.body)
 
@@ -648,8 +648,6 @@ module Fog
                 raise Fog::Compute::Abiquo::Error, error.response.body
               end
               raise Fog::Compute::Abiquo::Error, "#{error_code} - #{error_text}"
-            else
-              raise Fog::Compute::Abiquo::Error, error.response.body              
             end
           end
         end

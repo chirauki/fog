@@ -34,6 +34,13 @@ module Fog
           end
           merge_attributes(resp)
         end
+
+        def virtualmachines
+          requires :id, :enterprise_id
+          resp = service.get_admin_enterprises_x_users_x_action_virtualmachines(self.enterprise_id,
+                                                                                self.id)
+          Fog::Compute::Abiquo::Virtualmachines.new(:service => service).load(resp)
+        end
       end # Class User
     end # Class Abiquo
   end # module Compute
